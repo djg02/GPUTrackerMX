@@ -5,14 +5,20 @@ import os
 import sys
 import httpx
 import psycopg
+import time
+import random
 load_dotenv()
 
 FILTER_URL = "https://api.cyberpuerta.mx/v2/catalog/filter"
 ARTICLES_URL = "https://api.cyberpuerta.mx/v2/catalog/articles"
+ATTRIBUTES_URL = "https://api.cyberpuerta.mx/v2/pdp/articles" 
 headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "application/json",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Origin": "https://www.cyberpuerta.mx",
     "Referer": "https://www.cyberpuerta.mx/",
+    "Connection": "keep-alive",
 }
 
 store_id = 2
@@ -21,12 +27,12 @@ insert_query = """
     INSERT INTO listing (
         StoreListingId, StoreId, StoreTitle, Link, AvailabilityStatus,
         CreatedAt, UpdatedAt, LastseenAt, CurrentPrice, CurrentPriceUpdatedAt,
-        ImageUrl, StockAmount, RawJson, Currency, ShippingPrice
+        ImageUrl, StockAmount, RawJson, Currency, ShippingPrice, SpecJson
     )
     VALUES (
         %s, %s, %s, %s, %s,
         NOW(), NOW(), NOW(), %s, NOW(),
-        %s, %s, %s, %s, %s
+        %s, %s, %s, %s, %s, %s
     )
     ON CONFLICT (StoreId, StoreListingId) DO UPDATE SET
         CurrentPrice = EXCLUDED.CurrentPrice,
@@ -35,7 +41,8 @@ insert_query = """
         StockAmount = EXCLUDED.StockAmount,
         AvailabilityStatus = EXCLUDED.AvailabilityStatus,
         ShippingPrice = EXCLUDED.ShippingPrice,
-        RawJson = EXCLUDED.RawJson;
+        RawJson = EXCLUDED.RawJson,
+        SpecJson = EXCLUDED.SpecJson;
 """
 
 
@@ -78,7 +85,9 @@ try:
             sys.exit(1)
 
         for chunk in chunk_list(article_ids, 24):
+            time.sleep(random.uniform(3, 6))
             try:
+                time.sleep(random.uniform(0.7, 2.0))
                 params = [("articles[]", article_id) for article_id in chunk]
                 response = client.get(ARTICLES_URL, params=params)
                 response.raise_for_status()
@@ -91,6 +100,27 @@ try:
 
                 batch_data = []
                 for product in products:
+                    product_id = product.get("id")
+
+                    try:
+                        time.sleep(random.uniform(0.3, 1.0))
+                        attr_response = client.get(f"{ATTRIBUTES_URL}/{product_id}/attributes")
+                        attr_response.raise_for_status()
+                        spec_json = attr_response.json().get("data", {})
+
+                    except httpx.HTTPStatusError as e:
+                        print(f"[red]Failed fetching specs for {product_id}:[/red] {e.response.status_code}")
+                        spec_json = None
+
+                    except Exception as attr_err:
+                        print(f"[red]Failed fetching specs for {product_id}:[/red] {attr_err}")
+                        spec_json = None
+                    
+                    if spec_json is None:
+                        print(f"[yellow]Skipping DB write for {product_id} — specs failed[/yellow]")
+                        continue
+
+
                     batch_data.append((
                         product.get("id"),
                         store_id,
@@ -103,6 +133,7 @@ try:
                         json.dumps(product, default=str),
                         "MXN",
                         product.get("shipping"),
+                        json.dumps(spec_json, default=str),
                     ))
 
                 try:

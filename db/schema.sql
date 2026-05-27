@@ -2,9 +2,20 @@
 
 CREATE SCHEMA public AUTHORIZATION pg_database_owner;
 
+COMMENT ON SCHEMA public IS 'standard public schema';
+
 -- DROP SEQUENCE public.listing_listingid_seq;
 
 CREATE SEQUENCE public.listing_listingid_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+-- DROP SEQUENCE public.listing_parsed_listingparsedid_seq;
+
+CREATE SEQUENCE public.listing_parsed_listingparsedid_seq
 	INCREMENT BY 1
 	MINVALUE 1
 	MAXVALUE 9223372036854775807
@@ -91,11 +102,49 @@ CREATE TABLE public.listing (
 	currency varchar(1000) NULL,
 	storelistingid varchar(1000) NULL,
 	shippingprice int4 NULL,
+	parsed bool DEFAULT false NULL,
+	parsedat timestamp NULL,
+	specjson json NULL,
 	CONSTRAINT listing_pkey PRIMARY KEY (listingid),
 	CONSTRAINT uq_listing_store_external UNIQUE (storeid, storelistingid),
 	CONSTRAINT fk_listing_product FOREIGN KEY (productid) REFERENCES public.product(productid),
 	CONSTRAINT fk_listing_store FOREIGN KEY (storeid) REFERENCES public.store(storeid)
 );
+
+
+-- public.listing_parsed definition
+
+-- Drop table
+
+-- DROP TABLE public.listing_parsed;
+
+CREATE TABLE public.listing_parsed (
+	listingparsedid bigserial NOT NULL,
+	canonicalid int8 NULL,
+	manufacturer text NULL,
+	chipset_brand text NULL,
+	gpumodel text NULL,
+	gpuvariant text NULL,
+	series text NULL,
+	oc bool NULL,
+	vramgb numeric(4, 1) NULL,
+	memorytype text NULL,
+	buswidth int4 NULL,
+	interfaceversion text NULL,
+	coolervariant text NULL,
+	color text NULL,
+	sku text NULL,
+	parsedat timestamp DEFAULT now() NULL,
+	title varchar(255) NULL,
+	fans int4 NULL,
+	boostclock int4 NULL,
+	baseclock int4 NULL,
+	listingid int8 NULL,
+	CONSTRAINT listing_parsed_pkey PRIMARY KEY (listingparsedid),
+	CONSTRAINT fk_listing FOREIGN KEY (listingid) REFERENCES public.listing(listingid),
+	CONSTRAINT listing_parsed_canonicalid_fkey FOREIGN KEY (canonicalid) REFERENCES public.product(productid)
+);
+CREATE UNIQUE INDEX listing_parsed_listingid_unique ON public.listing_parsed USING btree (listingid);
 
 
 -- public.pricesnapshot definition
