@@ -12,6 +12,7 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 ## Supported Stores
 - DDTech
 - Cyberpuerta
+- Digitalife
 - Additional retailers planned.
 
 ## Database Stores
