@@ -105,10 +105,10 @@ def create_products(rows):
                 continue
 
             canonicalname = build_canonical_name(
-                row["manufacturer"],
+                row["manufacturer_normalized"],
                 row["chipset_brand"],
-                row["gpumodel"],
-                row["coolervariant"],
+                row["gpumodel_normalized"],
+                row["coolervariant_normalized"],
                 row["oc"],
                 row["vramgb"],
                 row["memorytype"],
@@ -121,8 +121,11 @@ def create_products(rows):
                     canonicalname,
                     brand,
                     model,
+                    model_normalized,
                     coolervariant,
+                    coolervariant_normalized,
                     manufacturer,
+                    manufacturer_normalized,
                     series,
                     oc,
                     vramgb,
@@ -139,7 +142,7 @@ def create_products(rows):
                     %s,%s,%s,%s,%s,
                     %s,%s,%s,%s,%s,
                     %s,%s,%s,%s,%s,
-                    %s,NOW()
+                    %s,%s,%s,%s,NOW()
                 )
                 RETURNING productid
             """, (
@@ -147,8 +150,11 @@ def create_products(rows):
                 canonicalname,
                 row["chipset_brand"],
                 row["gpumodel"],
+                row["gpumodel_normalized"],
                 row["coolervariant"],
+                row["coolervariant_normalized"],
                 row["manufacturer"],
+                row["manufacturer_normalized"],
                 row["series"],
                 row["oc"],
                 row["vramgb"],

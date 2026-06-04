@@ -91,6 +91,9 @@ CREATE TABLE public.product (
 	baseclock int4 NULL,
 	createdat timestamp DEFAULT now() NULL,
 	coolervariant varchar(255) NULL,
+	model_normalized text NULL,
+	coolervariant_normalized text NULL,
+	manufacturer_normalized text NULL,
 	CONSTRAINT product_pkey PRIMARY KEY (productid)
 );
 
@@ -170,6 +173,10 @@ CREATE TABLE public.listing_parsed (
 	baseclock int4 NULL,
 	listingid int8 NULL,
 	product_normalized bool DEFAULT false NOT NULL,
+	product_matched bool DEFAULT false NOT NULL,
+	gpumodel_normalized text NULL,
+	coolervariant_normalized text NULL,
+	manufacturer_normalized text NULL,
 	CONSTRAINT listing_parsed_listingid_unique UNIQUE (listingid),
 	CONSTRAINT listing_parsed_pkey PRIMARY KEY (listingparsedid),
 	CONSTRAINT fk_listing FOREIGN KEY (listingid) REFERENCES public.listing(listingid),
