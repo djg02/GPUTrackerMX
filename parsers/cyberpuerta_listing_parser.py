@@ -31,7 +31,7 @@ def parse (id, jsondata, spec_json):
         buswidth_raw = get_spec(spec_json, "Memoria", "ancho_de_datos")
         buswidth = int(re.sub(r'[^\d]', '', buswidth_raw)) if buswidth_raw else None
         interfaceversion_raw = get_spec(spec_json, "Puertos e Interfaces", "tipo_de_interfaz")
-        interfaceversion = interfaceversion_raw.replace("PCI Express ", "").strip() if interfaceversion_raw else None
+        interfaceversion = re.sub(r'x\d+\s*', '', interfaceversion_raw.replace("PCI Express ", "")).strip() if interfaceversion_raw else None
         fans = get_spec(spec_json, "Diseño", "numero_de_ventiladores")
         fans = int(fans) if fans and fans.isdigit() else None
         sku = jsondata.get("sku")
@@ -131,15 +131,23 @@ def parse_cooler_variant(title, manufacturer, chipsetbrand, gpumodel, vramgb_raw
     s = re.sub(r',?\s*PCI Express[\s\w.x]*.*$', '', s, flags=re.IGNORECASE).strip()
     s = re.sub(r'\s*-\s*incluye.*$', '', s, flags=re.IGNORECASE).strip()
 
-    # 4b. Clean up leading/trailing commas again after suffix removal
+    # 4a. Clean up leading/trailing commas again after suffix removal
     s = re.sub(r'^[\s,\-]+|[\s,\-]+$', '', s).strip()
 
     # 4b. Remove any remaining PCI Express / GDDR spec fragments
     s = re.sub(r',?\s*PCI Express[\s\w.x]*$', '', s, flags=re.IGNORECASE).strip()
     s = re.sub(r',?\s*\d+-bit\s+\w+$', '', s, flags=re.IGNORECASE).strip()
 
-    # 4c. Remove long parenthetical or dash-separated spec descriptions
+    # 4c. Strip standalone "x" leftover from x16 stripping  
+    s = re.sub(r'(?<!\w)x(?!\w)', '', s, flags=re.IGNORECASE).strip()
+
+    # 4d. Remove long parenthetical or dash-separated spec descriptions
     s = re.sub(r'\s*-\s*incluye.*$', '', s, flags=re.IGNORECASE).strip()
+
+    # 4e. Strip fan descriptions
+    s = re.sub(r'\b(?:Triple|Doble|Single|Dual|Doble)\s+Ventilador(?:es)?\b', '', s, flags=re.IGNORECASE).strip()
+    s = re.sub(r'\b\d+\s*Ventilador(?:es)?\b', '', s, flags=re.IGNORECASE).strip()
+    s = re.sub(r'\bTriple\s+Fan\b|\bDual\s+Fan\b|\bSingle\s+Fan\b', '', s, flags=re.IGNORECASE).strip()
 
     # 5. Remove "OC Edition" / "OC" anywhere
     s = re.sub(r'\bOC Edition\b|\bOC\b', '', s, flags=re.IGNORECASE).strip()
