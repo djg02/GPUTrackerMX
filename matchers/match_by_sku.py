@@ -29,6 +29,8 @@ def normalize_sku(sku: str) -> str:
     sku = re.sub(r'[^A-Z0-9\-]', '', sku)
     # collapse dashes
     sku = re.sub(r'-+', '-', sku)
+    # strip regional suffix
+    sku = re.sub(r'-ROW$', '', sku)
     return sku.strip('-').lower()
 
 def get_unmatched_listings():
