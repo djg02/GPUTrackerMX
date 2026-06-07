@@ -28,7 +28,7 @@ def parse(id, jsondata, spec_json):
         oc = (oc_raw == "Si") or bool(re.search(r'\bOC\b', title, re.IGNORECASE))
         color = get_attr(spec_json, "Color del producto")
 
-        vramgb_raw = get_attr(spec_json, "Capacidad memoria de adaptador gráfico")
+        vramgb_raw = (get_attr(spec_json, "Capacidad memoria de adaptador gráfico") or get_attr(spec_json, "Capacidad de Memoria Gráfica"))
         vramgb = int(re.sub(r'[^\d]', '', vramgb_raw)) if vramgb_raw and re.search(r'\d', vramgb_raw) else None
 
         memorytype = get_attr(spec_json, "Tipo de memoria de adaptador gráfico")
@@ -118,6 +118,7 @@ def parse_cooler_variant(title, manufacturer, chipsetbrand, gpumodel, vramgb_raw
     s = re.sub(r'^Tarjeta[s]? de Video,?\s*', '', s, flags=re.IGNORECASE).strip()
     s = re.sub(r'^Tarjeta[s]?\s*Gr[aá]fica,?\s*', '', s, flags=re.IGNORECASE).strip()
     s = re.sub(r'^Gr[aá]fica,?\s*', '', s, flags=re.IGNORECASE).strip()
+    s = re.sub(r'\bGr[aá]fico\b', '', s, flags=re.IGNORECASE).strip()
 
     # 3. Remove known tokens: manufacturer, chipset brand, GPU model
     for token in [manufacturer, chipsetbrand, gpumodel]:
@@ -157,32 +158,32 @@ def parse_cooler_variant(title, manufacturer, chipsetbrand, gpumodel, vramgb_raw
     s = re.sub(r'\b\d+\s*Ventilador(?:es)?\b', '', s, flags=re.IGNORECASE).strip()
     s = re.sub(r'\bTriple\s+Fan\b|\bDual\s+Fan\b|\bSingle\s+Fan\b', '', s, flags=re.IGNORECASE).strip()
 
-    # Strip standalone PCIe/PCIE remnants
+    # 3h. Strip standalone PCIe/PCIE remnants
     s = re.sub(r'\bPCIe\b|\bPCIE\b', '', s, flags=re.IGNORECASE).strip()
 
-    # Strip standalone "x" leftover from x16 stripping  
+    # 3i. Strip standalone "x" leftover from x16 stripping  
     s = re.sub(r'(?<!\w)x(?!\w)', '', s, flags=re.IGNORECASE).strip()
 
-    # Strip standalone "XT" only when isolated (not part of a word like "XTX")
+    # 3j. Strip standalone "XT" only when isolated (not part of a word like "XTX")
     s = re.sub(r'\bXT\b(?!X)', '', s).strip()
     s = re.sub(r'\bTi\b', '', s).strip()
 
-    # Strip "- ," and ", -" and ", , " separator remnants
+    # 3k. Strip "- ," and ", -" and ", , " separator remnants
     s = re.sub(r',?\s*-\s*,?', ' ', s).strip()
     s = re.sub(r'(,\s*){2,}', ' ', s).strip()
 
-    # Strip trailing/leading "- " 
+    # 3l. Strip trailing/leading "- " 
     s = re.sub(r'^[\s,\-]+|[\s,\-]+$', '', s).strip()
 
-    # 3h. Strip color tokens
+    # 3m. Strip color tokens
     if color:
         for c in color.split(','):
             s = re.sub(r'\b' + re.escape(c.strip()) + r'\b', '', s, flags=re.IGNORECASE).strip()
 
-    # 3i. Strip standalone resolution/version numbers like "5.0", "4.0"
+    # 3o. Strip standalone resolution/version numbers like "5.0", "4.0"
     s = re.sub(r'\b\d+\.\d+\b', '', s).strip()
 
-    # 3j. Strip "x16", "x8" slot width remnants
+    # 3p. Strip "x16", "x8" slot width remnants
     s = re.sub(r'\bx\d+\b', '', s, flags=re.IGNORECASE).strip()
 
     # 4. Strip trailing spec suffixes

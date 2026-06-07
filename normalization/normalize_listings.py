@@ -18,7 +18,8 @@ cursor = conn.cursor()
 def get_rows():
     cursor.execute("""
             SELECT listingparsedid, manufacturer, coolervariant, gpumodel
-            FROM listing_parsed;
+            FROM listing_parsed
+            WHERE product_normalized = FALSE;
         """)
     return cursor.fetchall()
 
