@@ -12,9 +12,9 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 * Parses and normalizes hardware attributes into structured fields
 * Matches products across stores using specification-based and SKU-based matching
 
+## Architecture
 
 ![GPU Tracker File Pipeline](assets/tracker_file_flowchart.drawio.png)
-
 
 ## Supported Stores
 
