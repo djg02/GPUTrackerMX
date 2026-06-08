@@ -38,7 +38,8 @@ Each listing stores:
 
 * Python
 * PostgreSQL
-* Playwright
+* BeautifulSoup
+* FlareSolverr
 * httpx
 * psycopg
 
