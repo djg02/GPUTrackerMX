@@ -32,6 +32,7 @@ def normalize_sku(sku: str) -> str:
     sku = re.sub(r'-ROW$', '', sku)
     return sku.strip('-').lower()
 
+
 def build_canonical_name(manufacturer, chipset_brand, gpumodel, coolervariant, oc, vramgb, memorytype, color):
     parts = [manufacturer, chipset_brand, gpumodel, coolervariant]
     if oc:
@@ -67,17 +68,21 @@ def find_duplicate_product(row):
     ))
     return cursor.fetchall()
 
-def get_unprocessed_cyberpuerta():
+def get_unprocessed_digitalife():
     cursor.execute("""
         SELECT lp.*
         FROM listing_parsed lp
         JOIN listing l
             ON lp.listingid = l.listingid
-        WHERE l.storeid = 2
+        WHERE l.storeid = 3
         AND lp.sku IS NOT NULL
         AND trim(lp.sku) <> ''
         AND lp.product_normalized = TRUE
-        AND product_matched = FALSE;
+        AND lp.product_matched = FALSE
+        AND lp.manufacturer_normalized IS NOT NULL
+        AND lp.gpumodel_normalized IS NOT NULL
+        AND lp.coolervariant_normalized IS NOT NULL
+        AND lp.vramgb IS NOT NULL;
     """)
     return cursor.fetchall()
 
@@ -122,13 +127,12 @@ def create_products(rows):
                 print(f"[yellow]SKU matched listing {row['listingid']} → product {product_id}[/yellow]")
                 continue
 
-            # 2. Spec duplicate check
+            # 2. Spec+color duplicate check
             duplicates = find_duplicate_product(row)
 
             if len(duplicates) == 1:
                 product_id = duplicates[0]["productid"]
 
-                # register the new SKU against the existing product
                 cursor.execute("""
                     INSERT INTO product_sku (productid, sku, normalizedsku)
                     VALUES (%s, %s, %s)
@@ -192,10 +196,11 @@ def create_products(rows):
                 row["chipset_brand"], row["gpumodel"], row["gpumodel_normalized"],
                 row["coolervariant"], row["coolervariant_normalized"],
                 row["manufacturer"], row["manufacturer_normalized"],
-                row["series"], row["oc"], row["vramgb"], row["memorytype"],
+                None,  # series not available from Digitalife
+                row["oc"], row["vramgb"], row["memorytype"],
                 row["buswidth"], row["interfaceversion"], row["color"],
                 row["fans"], row["boostclock"], row["baseclock"],
-                "cyberpuerta"
+                "digitalife"
             ))
 
             product_id = cursor.fetchone()["productid"]
@@ -210,7 +215,7 @@ def create_products(rows):
                     productid, listingid, matchmethod, confidence
                 )
                 VALUES (%s, %s, %s, %s)
-            """, (product_id, row["listingid"], "cyberpuerta_source", 100.0))
+            """, (product_id, row["listingid"], "digitalife_source", 100.0))
 
             cursor.execute("""
                 UPDATE listing_parsed
@@ -232,8 +237,8 @@ def create_products(rows):
     print(f"[yellow]Ambiguous dedup:[/yellow] {ambiguous}")
 
 if __name__ == "__main__":
-    rows = get_unprocessed_cyberpuerta()
-    print(f"[cyan]Found {len(rows)} unprocessed Cyberpuerta listings[/cyan]")
+    rows = get_unprocessed_digitalife()
+    print(f"[cyan]Found {len(rows)} unprocessed Digitalife listings[/cyan]")
     create_products(rows)
     cursor.close()
     conn.close()

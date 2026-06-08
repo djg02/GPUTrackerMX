@@ -84,21 +84,21 @@ def match_by_specs(rows):
             if len(products) == 1:
                 product_id = products[0]["productid"]
 
-                #cursor.execute("""
-                 #   INSERT INTO product_listing_match (
-                  #      productid, listingid, matchmethod, confidence
-                   #  )
-                #    VALUES (%s, %s, %s, %s)
-                #    ON CONFLICT (listingid) DO NOTHING
-                #""", (product_id, row["listingid"], "spec", 85.0))
+                cursor.execute("""
+                   INSERT INTO product_listing_match (
+                      productid, listingid, matchmethod, confidence
+                      )
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (listingid) DO NOTHING
+                """, (product_id, row["listingid"], "spec", 85.0))
 
-                #cursor.execute("""
-                #    UPDATE listing_parsed
-                #    SET product_matched = TRUE
-                #    WHERE listingid = %s
-                # """, (row["listingid"],))
+                cursor.execute("""
+                    UPDATE listing_parsed
+                    SET product_matched = TRUE
+                    WHERE listingid = %s
+                """, (row["listingid"],))
 
-                #conn.commit()
+                conn.commit()
 
                 matched += 1
                 print(f"[green]Matched listing {row['listingid']} → product {product_id}[/green]")
