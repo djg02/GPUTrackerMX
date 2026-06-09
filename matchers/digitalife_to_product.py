@@ -46,6 +46,32 @@ def build_canonical_name(manufacturer, chipset_brand, gpumodel, coolervariant, o
     return " ".join(str(x).strip() for x in parts if x is not None)
 
 def find_duplicate_product(row):
+
+    params = (
+        row["manufacturer_normalized"],
+        row["gpumodel_normalized"],
+        row["vramgb"],
+        row["memorytype"],
+        row["coolervariant_normalized"],
+        row["oc"],
+    )
+
+    if row["color_normalized"]:
+        cursor.execute("""
+            SELECT productid
+            FROM product
+            WHERE producttype = 'GPU'
+            AND manufacturer_normalized = %s
+            AND model_normalized = %s
+            AND COALESCE(vramgb, -1) = COALESCE(%s, -1)
+            AND COALESCE(memorytype, '') = COALESCE(%s, '')
+            AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
+            AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
+            AND color = %s
+        """, (*params, row["color_normalized"]))
+
+        return cursor.fetchall()
+
     cursor.execute("""
         SELECT productid
         FROM product
@@ -56,16 +82,9 @@ def find_duplicate_product(row):
         AND COALESCE(memorytype, '') = COALESCE(%s, '')
         AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
         AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
-        AND COALESCE(color, '') = COALESCE(%s, '')
-    """, (
-        row["manufacturer_normalized"],
-        row["gpumodel_normalized"],
-        row["vramgb"],
-        row["memorytype"],
-        row["coolervariant_normalized"],
-        row["oc"],
-        row["color"]
-    ))
+        AND color IS NULL
+    """, params)
+
     return cursor.fetchall()
 
 def get_unprocessed_digitalife():
@@ -82,7 +101,13 @@ def get_unprocessed_digitalife():
         AND lp.manufacturer_normalized IS NOT NULL
         AND lp.gpumodel_normalized IS NOT NULL
         AND lp.coolervariant_normalized IS NOT NULL
-        AND lp.vramgb IS NOT NULL;
+        AND lp.vramgb IS NOT NULL
+        ORDER BY
+            CASE
+                WHEN lp.color_normalized IS NOT NULL THEN 0
+                ELSE 1
+            END,
+            lp.listingparsedid
     """)
     return cursor.fetchall()
 
@@ -174,7 +199,7 @@ def create_products(rows):
                 row["oc"],
                 row["vramgb"],
                 row["memorytype"],
-                row["color"]
+                row["color_normalized"]
             )
 
             cursor.execute("""
@@ -198,7 +223,7 @@ def create_products(rows):
                 row["manufacturer"], row["manufacturer_normalized"],
                 None,  # series not available from Digitalife
                 row["oc"], row["vramgb"], row["memorytype"],
-                row["buswidth"], row["interfaceversion"], row["color"],
+                row["buswidth"], row["interfaceversion"], row["color_normalized"],
                 row["fans"], row["boostclock"], row["baseclock"],
                 "digitalife"
             ))

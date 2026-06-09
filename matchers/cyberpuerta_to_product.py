@@ -32,7 +32,7 @@ def normalize_sku(sku: str) -> str:
     sku = re.sub(r'-ROW$', '', sku)
     return sku.strip('-').lower()
 
-def build_canonical_name(manufacturer, chipset_brand, gpumodel, coolervariant, oc, vramgb, memorytype, color):
+def build_canonical_name(manufacturer, chipset_brand, gpumodel, coolervariant, oc, vramgb, memorytype, color_normalized):
     parts = [manufacturer, chipset_brand, gpumodel, coolervariant]
     if oc:
         parts.append("OC")
@@ -40,31 +40,53 @@ def build_canonical_name(manufacturer, chipset_brand, gpumodel, coolervariant, o
         parts.append(f"{vramgb}GB")
     if memorytype is not None:
         parts.append(memorytype)
-    if color is not None:
-        parts.append(color)
-    return " ".join(str(x).strip() for x in parts if x is not None)
+    if color_normalized:
+            parts.append(color_normalized)
+    return " ".join(str(x).strip() for x in parts if x)
 
 def find_duplicate_product(row):
-    cursor.execute("""
-        SELECT productid
-        FROM product
-        WHERE producttype = 'GPU'
-        AND manufacturer_normalized = %s
-        AND model_normalized = %s
-        AND COALESCE(vramgb, -1) = COALESCE(%s, -1)
-        AND COALESCE(memorytype, '') = COALESCE(%s, '')
-        AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
-        AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
-        AND COALESCE(color, '') = COALESCE(%s, '')
-    """, (
+
+    params = (
         row["manufacturer_normalized"],
         row["gpumodel_normalized"],
         row["vramgb"],
         row["memorytype"],
         row["coolervariant_normalized"],
         row["oc"],
-        row["color"]
-    ))
+    )
+
+    # White products only match White products
+    if row["color_normalized"] == "White":
+
+        cursor.execute("""
+            SELECT productid
+            FROM product
+            WHERE producttype = 'GPU'
+            AND manufacturer_normalized = %s
+            AND model_normalized = %s
+            AND COALESCE(vramgb,-1)=COALESCE(%s,-1)
+            AND COALESCE(memorytype,'')=COALESCE(%s,'')
+            AND COALESCE(coolervariant_normalized,'')=COALESCE(%s,'')
+            AND COALESCE(oc,FALSE)=COALESCE(%s,FALSE)
+            AND color = 'White'
+        """, params)
+
+        return cursor.fetchall()
+
+    # Default products only match default products
+    cursor.execute("""
+        SELECT productid
+        FROM product
+        WHERE producttype = 'GPU'
+        AND manufacturer_normalized = %s
+        AND model_normalized = %s
+        AND COALESCE(vramgb,-1)=COALESCE(%s,-1)
+        AND COALESCE(memorytype,'')=COALESCE(%s,'')
+        AND COALESCE(coolervariant_normalized,'')=COALESCE(%s,'')
+        AND COALESCE(oc,FALSE)=COALESCE(%s,FALSE)
+        AND color IS NULL
+    """, params)
+
     return cursor.fetchall()
 
 def get_unprocessed_cyberpuerta():
@@ -74,10 +96,17 @@ def get_unprocessed_cyberpuerta():
         JOIN listing l
             ON lp.listingid = l.listingid
         WHERE l.storeid = 2
+        AND coolervariant_normalized IS NOT NULL
         AND lp.sku IS NOT NULL
         AND trim(lp.sku) <> ''
         AND lp.product_normalized = TRUE
-        AND product_matched = FALSE;
+        AND lp.product_matched = FALSE
+        ORDER BY
+            CASE
+                WHEN lp.color_normalized IS NOT NULL THEN 0
+                ELSE 1
+            END,
+            lp.listingparsedid
     """)
     return cursor.fetchall()
 
@@ -170,7 +199,7 @@ def create_products(rows):
                 row["oc"],
                 row["vramgb"],
                 row["memorytype"],
-                row["color"]
+                row["color_normalized"]
             )
 
             cursor.execute("""
@@ -193,7 +222,7 @@ def create_products(rows):
                 row["coolervariant"], row["coolervariant_normalized"],
                 row["manufacturer"], row["manufacturer_normalized"],
                 row["series"], row["oc"], row["vramgb"], row["memorytype"],
-                row["buswidth"], row["interfaceversion"], row["color"],
+                row["buswidth"], row["interfaceversion"], row["color_normalized"],
                 row["fans"], row["boostclock"], row["baseclock"],
                 "cyberpuerta"
             ))

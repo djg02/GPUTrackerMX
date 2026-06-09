@@ -27,27 +27,43 @@ def get_unmatched_listings():
     return cursor.fetchall()
 
 
-def find_products(manufacturer_normalized, gpumodel_normalized, vramgb, memorytype, coolervariant_normalized, oc, color=None):
-    cursor.execute("""
-        SELECT productid
-        FROM product
-        WHERE producttype = 'GPU'
-        AND manufacturer_normalized = %s
-        AND model_normalized = %s
-        AND COALESCE(vramgb, -1) = COALESCE(%s, -1)
-        AND COALESCE(memorytype, '') = COALESCE(%s, '')
-        AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
-        AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
-        {color_filter}
-    """.format(color_filter="AND COALESCE(color, '') = COALESCE(%s, '')" if color else ""), (
+def find_products(manufacturer_normalized, gpumodel_normalized, vramgb, memorytype, coolervariant_normalized, oc, color_normalized ):
+    params = (
         manufacturer_normalized,
         gpumodel_normalized,
         vramgb,
         memorytype,
         coolervariant_normalized,
         oc,
-        *([color] if color else [])
-    ))
+    )
+
+    if color_normalized:
+        cursor.execute("""
+            SELECT productid
+            FROM product
+            WHERE producttype = 'GPU'
+            AND manufacturer_normalized = %s
+            AND model_normalized = %s
+            AND COALESCE(vramgb, -1) = COALESCE(%s, -1)
+            AND COALESCE(memorytype, '') = COALESCE(%s, '')
+            AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
+            AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
+            AND color = %s
+        """, (*params, color_normalized))
+    else:
+        cursor.execute("""
+            SELECT productid
+            FROM product
+            WHERE producttype = 'GPU'
+            AND manufacturer_normalized = %s
+            AND model_normalized = %s
+            AND COALESCE(vramgb, -1) = COALESCE(%s, -1)
+            AND COALESCE(memorytype, '') = COALESCE(%s, '')
+            AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
+            AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
+            AND color IS NULL
+        """, params)
+
     return cursor.fetchall()
 
 
@@ -64,22 +80,9 @@ def match_by_specs(rows):
                 row["vramgb"],
                 row["memorytype"],
                 row["coolervariant_normalized"],
-                row["oc"]
+                row["oc"],
+                row["color_normalized"]
             )
-
-            # tiebreak with color if ambiguous
-            if len(products) > 1 and row["color"]:
-                color_filtered = find_products(
-                    row["manufacturer_normalized"],
-                    row["gpumodel_normalized"],
-                    row["vramgb"],
-                    row["memorytype"],
-                    row["coolervariant_normalized"],
-                    row["oc"],
-                    row["color"]
-                )
-                if len(color_filtered) > 0:
-                    products = color_filtered
 
             if len(products) == 1:
                 product_id = products[0]["productid"]

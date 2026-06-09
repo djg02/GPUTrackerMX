@@ -17,7 +17,7 @@ cursor = conn.cursor()
 
 def get_rows():
     cursor.execute("""
-            SELECT listingparsedid, manufacturer, coolervariant, gpumodel
+            SELECT listingparsedid, manufacturer, coolervariant, gpumodel, color, title
             FROM listing_parsed
             WHERE product_normalized = FALSE;
         """)
@@ -66,7 +66,101 @@ def normalize_model(model):
         model = f"GeForce {model}"
 
     return model
+WHITE_VARIANT_EXCEPTIONS = {
+    "AORUS MASTER ICE",
+    "MASTER ICE",
+    "EAGLE ICE",
+    "EAGLE ICE SFF",
+    "GAMING ICE",
+    "ICE",
+    "ICE BLANCO",
+    "HELLHOUND SPECTRAL WHITE",
+}
 
+def normalize_color(color, title=None):
+    # explicit color field wins
+    if color:
+        value = color.upper().strip()
+
+        replacements = {
+            "Á": "A",
+            "É": "E",
+            "Í": "I",
+            "Ó": "O",
+            "Ú": "U",
+        }
+
+        for old, new in replacements.items():
+            value = value.replace(old, new)
+
+        WHITE_COLORS = {
+            "WHITE",
+            "BLANCO",
+            "WHITE EDITION",
+            "WHITE OC",
+        }
+
+        if value in WHITE_COLORS:
+            return "White"
+
+    # fallback to title
+    if title:
+        title_upper = title.upper()
+
+        WHITE_KEYWORDS = (
+            " WHITE ",
+            " BLANCO ",
+            " AMP WHITE ",
+            " TWIN EDGE WHITE ",
+            " SOLID WHITE ",
+            " SOLID CORE WHITE ",
+            " TRINITY WHITE ",
+            " GAMING TRIO WHITE ",
+            " VENTUS WHITE ",
+            " DUAL WHITE ",
+            " TUF WHITE ",
+        )
+
+        padded = f" {title_upper} "
+
+        for keyword in WHITE_KEYWORDS:
+            if keyword in padded:
+                return "White"
+
+    return None
+
+def extract_variant_color(variant):
+    if not variant:
+        return None
+
+    key = variant.upper().strip()
+
+    if key in WHITE_VARIANT_EXCEPTIONS:
+        return None
+
+    if (
+        "WHITE" in key
+        or "BLANCO" in key
+    ):
+        return "White"
+
+    return None
+
+def strip_color_from_variant(variant):
+    if not variant:
+        return variant
+
+    key = variant.upper().strip()
+
+    if key in WHITE_VARIANT_EXCEPTIONS:
+        return variant
+
+    variant = re.sub(r"\bWHITE\b", "", variant, flags=re.I)
+    variant = re.sub(r"\bBLANCO\b", "", variant, flags=re.I)
+
+    variant = re.sub(r"\s+", " ", variant).strip()
+
+    return variant
 
 def normalize_variant(manufacturer, variant):
     if not variant:
@@ -74,6 +168,7 @@ def normalize_variant(manufacturer, variant):
 
     variant = variant.strip()
     variant = re.sub(r"\s+", " ", variant)
+    variant = strip_color_from_variant(variant)
 
     # obvious garbage
     variant = re.sub(r"^Tarjeta Video\s+", "", variant, flags=re.I)
@@ -153,12 +248,21 @@ def normalize_variant(manufacturer, variant):
             "WINDFORCE V2": "Windforce V2",
             "AORUS MASTER": "AORUS Master",
             "AORUS MASTER ICE": "AORUS Master Ice",
+            "AORUS MASTER LHR": "Aorus Master LHR",
+            "AORUS XTREME LHR": "Aorus Xtreme LHR",
             "XTREME WATERFORCE": "Xtreme Waterforce",
             "LOW PROFILE": "Low Profile",
             "AORUS ELITE": "AORUS Elite",
             "EAGLE SFF": "Eagle SFF",
             "ICE": "Ice",
             "WINDFORCE 2X V2": "Windforce 2X V2",
+            "AORUS XTREME": "AORUS Xtreme",
+            "AORUS WATERFORCE": "AORUS Waterforce",
+            "AORUS WATERFORCE WB": "AORUS Waterforce WB",
+            "AORUS XTREME WATERFORCE": "AORUS Xtreme Waterforce",
+            "MASTER": "AORUS Master",
+            "MASTER ICE": "AORUS Master Ice",
+            "XTREME": "AORUS Xtreme",
         },
 
         "ASUS": {
@@ -185,6 +289,7 @@ def normalize_variant(manufacturer, variant):
             "VENTUS 3X": "Ventus 3X",
             "VENTUS 3X PLUS": "Ventus 3X Plus",
             "GAMING TRIO": "Gaming Trio",
+            "GAMING TRIO WHITE": "Gaming Trio White",
             "GAMING X": "Gaming X",
             "SHADOW 2X": "Shadow 2X",
             "SHADOW 3X": "Shadow 3X",
@@ -193,6 +298,7 @@ def normalize_variant(manufacturer, variant):
             "VANGUARD SOC": "Vanguard SOC",
             "LOW PROFILE": "Low Profile",
             "TRIO": "Gaming Trio",
+            "TRIO WHITE": "Gaming Trio White",
             "VENTUS 2X WHITE": "Ventus 2X White",
             "VENTUS 2X WHITE PLUS": "Ventus 2X White Plus",
             "VENTUS 3X WHITE": "Ventus 3X White",
@@ -203,6 +309,7 @@ def normalize_variant(manufacturer, variant):
             "SUPRIM SOC": "Suprim SOC",
             "SUPRIM LIQUID SOC": "Suprim Liquid SOC",
             "LP": "Low Profile",
+            "MLG EDITION": "MLG Edition",
         },
 
         "POWERCOLOR": {
@@ -241,6 +348,9 @@ def normalize_variant(manufacturer, variant):
             "QICKSILVER": "Quicksilver",
             "SPEEDTESTER QICK": "Speedster QICK",
             "SPEEDTESTER SWFT": "Speedster SWFT",
+            "MERC": "Speedster Merc",
+            "QICK": "Speedster QICK",
+            "SWFT WHITE": "Speedster SWFT White",
                     },
 
         "ZOTAC": {
@@ -260,6 +370,10 @@ def normalize_variant(manufacturer, variant):
             "GAMING SOLID": "Solid",
             "GAMING AMP HOLO": "AMP Holo",
             "TWIN EDGE GAMING": "Twin Edge",
+            "GAMING TWIN EDGE": "Twin Edge",
+            "TWIN EDGE OC": "Twin Edge",
+            "TWIN EDGE WHITE": "Twin Edge White",
+            "TWIN EDGE WHITE OC": "Twin Edge White",
         },
 
         "PNY": {
@@ -273,6 +387,8 @@ def normalize_variant(manufacturer, variant):
             "XLR8 GAMING VERTO EPIC-X RGB": "XLR8 Verto",
             "XLR8 RGB": "XLR8",
             "TARJETA VIDEO VERTO": "Verto",
+            "OC EDITION": "OC Edition",
+            "OVERCLOCKED": "OC Edition",
         },
 
         "ASROCK": {
@@ -280,6 +396,10 @@ def normalize_variant(manufacturer, variant):
             "CHALLENGER D": "Challenger D",
             "PHANTOM GAMING": "Phantom Gaming",
             "STEEL LEGEND": "Steel Legend",
+            "CHALLENGER ITX": "Challenger ITX",
+            "PHANTOM GAMING D": "Phantom Gaming",
+            "PHANTOM GAMING OC": "Phantom Gaming",
+
         },
 
         "SAPPHIRE": {
@@ -288,13 +408,30 @@ def normalize_variant(manufacturer, variant):
             "PULSE XT": "Pulse XT",
             "PULSE GAMING": "Pulse Gaming",
             "XL": "XL",
+            "NITRO+ GAMING OC": "Nitro+",
+            "NITRO+ OC": "Nitro+",
+            "PURE OC": "Pure",
+            "PULSE OC": "Pulse",
         },
 
         "INNO3D": {
             "TWIN X2": "Twin X2",
             "TWIN X2 WHITE": "Twin X2 White",
             "X3": "X3",
-        }
+        },
+
+        "EVGA": {
+            "FTW3 ULTRA GAMING": "FTW3 Ultra",
+            "FTW3": "FTW3",
+            "XC3": "XC3",
+            "XC": "XC",
+        },
+
+        "PALIT": {
+            "GAMING PRO": "Gaming Pro",
+            "GAMEROCK": "GameRock",
+            "DUAL": "Dual",
+        },
     }
 
     key = variant.upper()
@@ -317,7 +454,7 @@ def normalize_manufacturer(manufacturer):
     return replacements.get(manufacturer, manufacturer)    
 
 
-def update_listing(listingparsedid, manufacturer_normalized, model_normalized, variant_normalized):
+def update_listing(listingparsedid, manufacturer_normalized, model_normalized, variant_normalized, color_normalized):
     cursor.execute(
         """
         UPDATE listing_parsed
@@ -325,13 +462,15 @@ def update_listing(listingparsedid, manufacturer_normalized, model_normalized, v
             manufacturer_normalized = %s,
             gpumodel_normalized = %s,
             coolervariant_normalized = %s,
+            color_normalized = %s,
             product_normalized = TRUE
         WHERE listingparsedid = %s
         """,
-        (
+        (   
             manufacturer_normalized,
             model_normalized,
             variant_normalized,
+            color_normalized,
             listingparsedid,
         ),
     )
@@ -342,13 +481,14 @@ def normalize_listing_rows():
 
     for row in rows:
         try:
+            color_normalized = normalize_color(row["color"], row["title"])
             manufacturer_normalized = normalize_manufacturer(row["manufacturer"])
 
             model_normalized = normalize_model(row["gpumodel"])
 
             variant_normalized = normalize_variant(row["manufacturer"], row["coolervariant"])
 
-            update_listing( row["listingparsedid"], manufacturer_normalized, model_normalized, variant_normalized)
+            update_listing(row["listingparsedid"], manufacturer_normalized, model_normalized, variant_normalized, color_normalized)
             print(f"[green]Updated[/green] {row['listingparsedid']}")
 
         except Exception as e:

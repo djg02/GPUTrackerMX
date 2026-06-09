@@ -94,6 +94,7 @@ CREATE TABLE public.product (
 	model_normalized text NULL,
 	coolervariant_normalized text NULL,
 	manufacturer_normalized text NULL,
+	"source" varchar(50) DEFAULT 'anchor'::character varying NULL,
 	CONSTRAINT product_pkey PRIMARY KEY (productid)
 );
 
