@@ -5,3 +5,5 @@ venv/
 .vscode/
 .idea/
 assets/tracker_file_flowchart.drawio
+node_modules/
+dist/

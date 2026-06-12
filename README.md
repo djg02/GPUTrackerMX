@@ -11,6 +11,7 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 * Supports both API-based and browser-automation scraping workflows
 * Parses and normalizes hardware attributes into structured fields
 * Matches products across stores using specification-based and SKU-based matching
+* Exposes product and listing data through a REST API
 
 ## Architecture
 
@@ -38,6 +39,9 @@ Each listing stores:
 
 * Python
 * PostgreSQL
+* TypeScript
+* Node.js
+* Express
 * BeautifulSoup
 * FlareSolverr
 * httpx
@@ -45,7 +49,7 @@ Each listing stores:
 
 ## Current Focus
 
-* Improving product matching accuracy
+* Initial REST API implementation
 * Frontend dashboard with price comparison
 * Expanding retailer coverage
 * Preparing historical price tracking infrastructure
@@ -53,7 +57,6 @@ Each listing stores:
 ## Planned Features
 
 * Historical price analytics
-* REST API
 * Automated scheduled scraping
 * CPU and other hardware category expansion
 * Public web interface
