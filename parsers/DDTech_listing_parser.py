@@ -494,7 +494,7 @@ def parse_title_only(listingid, title, cursor, conn):
 
     m = re.search(
         r'(?:GeForce\s+)?(?:RTX|GTX|GT)\s+\d{3,4}(?:\s*Ti)?(?:\s+SUPER)?'
-        r'|(?:Radeon\s+)?RX\s+\d{4}(?:\s*(?:XT|XTX|GRE))?'
+        r'|(?:Radeon\s+)?RX\s+\d{4}(?:\s*(?:XTX|XT|GRE))?'
         r'|(?:Arc\s+)?[AB]\d{3,4}\b',
         name_part,
         re.IGNORECASE

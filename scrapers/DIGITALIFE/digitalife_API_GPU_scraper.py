@@ -52,7 +52,7 @@ def get_availability(stock_stores, stock_providers):
     elif stock_providers > 0:
         return "Available"
     else:
-        return "OutOfstock"
+        return "OutOfStock"
 
 
 conn = psycopg.connect(
