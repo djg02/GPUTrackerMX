@@ -1,10 +1,55 @@
 import { Request, Response } from 'express';
 import pool from '../db';
 
+function addCondition(
+  conditions: string[],
+  values: any[],
+  param: any,
+  sqlFragment: (placeholder: string) => string,
+  transform: (val: any) => any = (val) => val
+) {
+  if (param !== undefined && param !== '') {
+    values.push(transform(param));
+    conditions.push(sqlFragment(`$${values.length}`));
+  }
+}
+
+
 export const getAllGpus = async (req: Request, res: Response) => {
- const { brand, minVram, maxPrice, minPrice, page = '1', limit = '20', sort, manufacturer, color, inStock} = req.query;
+   const {
+    brand, minVram, maxPrice, minPrice, manufacturer, color, inStock,
+    model, memorytype, oc, buswidth, fans, interfaceversion,
+    page = '1', limit = '20', sort, search
+  } = req.query;
+
     const pageNum = Number(page);
     const limitNum = Number(limit);
+
+    if (isNaN(pageNum) || pageNum < 1) {
+      return res.status(400).json({ error: 'Invalid page parameter. Must be a positive integer.' });
+    }
+
+    if (isNaN(limitNum) || limitNum < 1 || limitNum > 50) {
+      return res.status(400).json({ error: 'Invalid limit parameter. Must be between 1 and 50.' });
+    }
+
+    let minPriceNum: number | undefined;
+    let maxPriceNum: number | undefined;
+
+    if (minPrice !== undefined) {
+      minPriceNum = Number(minPrice);
+      if (isNaN(minPriceNum) || minPriceNum < 0) {
+        return res.status(400).json({ error: 'Invalid minPrice parameter. Must be a non-negative number.' });
+      }
+    }
+
+    if (maxPrice !== undefined) {
+      maxPriceNum = Number(maxPrice);
+      if (isNaN(maxPriceNum) || maxPriceNum < 0) {
+        return res.status(400).json({ error: 'Invalid maxPrice parameter. Must be a non-negative number.' });
+      }
+    }
+
     const offset = (pageNum - 1) * limitNum;
 
     const sortOptions: Record<string, string> = {
@@ -20,47 +65,40 @@ export const getAllGpus = async (req: Request, res: Response) => {
     const havingConditions: string[] = [];
     const values: any[] = [];
 
-    if (brand) {
-      values.push(brand);
-      conditions.push(`p.brand = $${values.length}`);
-    }
+    addCondition(conditions, values, brand, p => `p.brand = ${p}`);
+    addCondition(conditions, values, manufacturer, p => `p.manufacturer_normalized = ${p}`);
+    addCondition(conditions, values, color, p => `p.color = ${p}`);
+    addCondition(conditions, values, model, p => `p.model_normalized = ${p}`);
+    addCondition(conditions, values, memorytype, p => `p.memorytype = ${p}`);
+    addCondition(conditions, values, buswidth, p => `p.buswidth = ${p}`, Number);
+    addCondition(conditions, values, fans, p => `p.fans = ${p}`, Number);
+    addCondition(conditions, values, interfaceversion, p => `p.interfaceversion = ${p}`);
+    addCondition(conditions, values, minVram, p => `p.vramgb >= ${p}`, Number);
 
-    if (minVram) {
-      values.push(Number(minVram));
-      conditions.push(`p.vramgb >= $${values.length}`);
-    }
+    addCondition(havingConditions, values, maxPriceNum, p => 
+      `MIN(l.currentprice) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) <= ${p}`);
+    addCondition(havingConditions, values, minPriceNum, p => 
+      `MIN(l.currentprice) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) >= ${p}`);
 
-    if (maxPrice) {
-      values.push(Number(maxPrice));
-      havingConditions.push(`MIN(l.currentprice) <= $${values.length}`);
-    }
-
-    if (minPrice) {
-      values.push(Number(minPrice));
-      havingConditions.push(`MIN(l.currentprice) >= $${values.length}`);
-    }
-
-    if (manufacturer) {
-      values.push(manufacturer);
-      conditions.push(`p.manufacturer_normalized = $${values.length}`);
-    }
-
-    if (color) {
-      values.push(color);
-      conditions.push(`p.color = $${values.length}`);
+    if (oc !== undefined) {
+      values.push(oc === 'true');
+      conditions.push(`p.oc = $${values.length}`);
     }
 
     if (inStock === 'true') {
       havingConditions.push(`COUNT(*) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) > 0`);
     }
 
-    const whereClause = conditions.length > 0 
-      ? `WHERE ${conditions.join(' AND ')}` 
-      : '';
-    
-    const havingClause = havingConditions.length > 0
-      ? `HAVING ${havingConditions.join(' AND ')}`
-      : '';
+    if (search) {
+      const words = (search as string).trim().split(/\s+/);
+      words.forEach(word => {
+        values.push(`%${word}%`);
+        conditions.push(`p.canonicalname ILIKE $${values.length}`);
+      });
+}
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const havingClause = havingConditions.length > 0 ? `HAVING ${havingConditions.join(' AND ')}` : '';
 
     const countResult = await pool.query(`
             SELECT COUNT(*) FROM (
@@ -204,5 +242,38 @@ export const getGpuById = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch GPU' });
+  }
+};
+
+export const getGpuFilters = async (req: Request, res: Response) => {
+  try {
+    const [brandsResult, manufacturersResult, colorsResult, vramResult, modelResult, fansResult, memoryTypeResult, ocResult, buswidthResult, interfaceVersionResult ] = await Promise.all([
+          pool.query(`SELECT DISTINCT brand FROM product WHERE brand IS NOT NULL ORDER BY brand`),
+          pool.query(`SELECT DISTINCT manufacturer_normalized FROM product WHERE manufacturer_normalized IS NOT NULL ORDER BY manufacturer_normalized`),
+          pool.query(`SELECT DISTINCT color FROM product WHERE color IS NOT NULL ORDER BY color`),
+          pool.query(`SELECT DISTINCT vramgb FROM product WHERE vramgb IS NOT NULL ORDER BY vramgb`),
+          pool.query(`SELECT DISTINCT model_normalized FROM product WHERE model_normalized IS NOT NULL ORDER BY model_normalized`),
+          pool.query(`SELECT DISTINCT fans FROM product WHERE fans IS NOT NULL ORDER BY fans`),
+          pool.query(`SELECT DISTINCT memorytype FROM product WHERE memorytype IS NOT NULL ORDER BY memorytype`),
+          pool.query(`SELECT DISTINCT oc FROM product WHERE oc IS NOT NULL ORDER BY oc`),
+          pool.query(`SELECT DISTINCT buswidth FROM product WHERE buswidth IS NOT NULL ORDER BY buswidth`),
+          pool.query(`SELECT DISTINCT interfaceversion FROM product WHERE interfaceversion IS NOT NULL ORDER BY interfaceversion`)
+        ]);
+
+        res.json({
+          brands: brandsResult.rows.map(r => r.brand),
+          manufacturers: manufacturersResult.rows.map(r => r.manufacturer_normalized),
+          colors: colorsResult.rows.map(r => r.color),
+          vramOptions: vramResult.rows.map(r => Number(r.vramgb)),
+          models: modelResult.rows.map(r => r.model_normalized),
+          fans: fansResult.rows.map(r => r.fans),
+          memoryTypes: memoryTypeResult.rows.map(r => r.memorytype),
+          ocOptions: ocResult.rows.map(r => r.oc),
+          buswidths: buswidthResult.rows.map(r => r.buswidth),
+          interfaceVersions: interfaceVersionResult.rows.map(r => r.interfaceversion)
+        });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch filters' });
   }
 };
