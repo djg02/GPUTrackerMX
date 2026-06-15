@@ -18,7 +18,7 @@ function addCondition(
 export const getAllGpus = async (req: Request, res: Response) => {
    const {
     brand, minVram, maxPrice, minPrice, manufacturer, color, inStock,
-    model, memorytype, oc, buswidth, fans, interfaceversion,
+    model, memorytype, oc, buswidth, fans, interfaceversion, boostclock,
     page = '1', limit = '20', sort, search
   } = req.query;
 
@@ -73,7 +73,9 @@ export const getAllGpus = async (req: Request, res: Response) => {
     addCondition(conditions, values, buswidth, p => `p.buswidth = ${p}`, Number);
     addCondition(conditions, values, fans, p => `p.fans = ${p}`, Number);
     addCondition(conditions, values, interfaceversion, p => `p.interfaceversion = ${p}`);
+    addCondition(conditions, values, boostclock, p => `p.boostclock = ${p}` , Number);
     addCondition(conditions, values, minVram, p => `p.vramgb >= ${p}`, Number);
+    addCondition(conditions, values, oc, p => `p.oc >= ${p}`);
 
     addCondition(havingConditions, values, maxPriceNum, p => 
       `MIN(l.currentprice) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) <= ${p}`);
@@ -125,6 +127,9 @@ export const getAllGpus = async (req: Request, res: Response) => {
             p.model_normalized,
             p.coolervariant_normalized,
             p.vramgb,
+            p.boostclock,
+            p.color,
+            p.oc,
             json_agg(
                 json_build_object(
                 'storename', s.storename,
@@ -146,7 +151,7 @@ export const getAllGpus = async (req: Request, res: Response) => {
         LIMIT $${values.length - 1} OFFSET $${values.length}
     `, values);
 
-    const products = result.rows.map(product => {
+    const products = result.rows.map((product: any) => {
         const hasListings = product.listings[0]?.storename !== null;
 
         let lowestPrice = null;
@@ -261,16 +266,16 @@ export const getGpuFilters = async (req: Request, res: Response) => {
         ]);
 
         res.json({
-          brands: brandsResult.rows.map(r => r.brand),
-          manufacturers: manufacturersResult.rows.map(r => r.manufacturer_normalized),
-          colors: colorsResult.rows.map(r => r.color),
-          vramOptions: vramResult.rows.map(r => Number(r.vramgb)),
-          models: modelResult.rows.map(r => r.model_normalized),
-          fans: fansResult.rows.map(r => r.fans),
-          memoryTypes: memoryTypeResult.rows.map(r => r.memorytype),
-          ocOptions: ocResult.rows.map(r => r.oc),
-          buswidths: buswidthResult.rows.map(r => r.buswidth),
-          interfaceVersions: interfaceVersionResult.rows.map(r => r.interfaceversion)
+          brands: brandsResult.rows.map((r: any) => r.brand),
+          manufacturers: manufacturersResult.rows.map((r: any) => r.manufacturer_normalized),
+          colors: colorsResult.rows.map((r: any) => r.color),
+          vramOptions: vramResult.rows.map((r: any) => Number(r.vramgb)),
+          models: modelResult.rows.map((r: any) => r.model_normalized),
+          fans: fansResult.rows.map((r: any) => r.fans),
+          memoryTypes: memoryTypeResult.rows.map((r: any) => r.memorytype),
+          ocOptions: ocResult.rows.map((r: any) => r.oc),
+          buswidths: buswidthResult.rows.map((r: any) => r.buswidth),
+          interfaceVersions: interfaceVersionResult.rows.map((r: any) => r.interfaceversion)
         });
   } catch (error) {
     console.error(error);
