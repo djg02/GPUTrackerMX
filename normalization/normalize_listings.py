@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import psycopg
 import re
+import unicodedata
 load_dotenv()
 
 conn = psycopg.connect(
@@ -27,6 +28,17 @@ def get_rows():
 def normalize_model(model):
     if not model:
         return None
+    
+    model = unicodedata.normalize("NFKC", model)
+
+    # Remove soft hyphens and other invisible formatting chars
+    model = model.replace("\u00AD", "")  # soft hyphen
+
+    # Remove all Unicode format characters (Cf)
+    model = "".join(
+        c for c in model
+        if unicodedata.category(c) != "Cf"
+    )
 
     model = model.strip()
     model = re.sub(r"\s+", " ", model)
@@ -66,6 +78,7 @@ def normalize_model(model):
         model = f"GeForce {model}"
 
     return model
+
 WHITE_VARIANT_EXCEPTIONS = {
     "AORUS MASTER ICE",
     "MASTER ICE",
@@ -185,50 +198,6 @@ def normalize_variant(manufacturer, variant):
 
     key = variant.upper()
 
-    # XFX family collapsing
-    if manufacturer == "XFX":
-        if "MERC" in key:
-            return "Mercury"
-
-        if "QICK" in key or "QUICKSILVER" in key:
-            return "Quicksilver"
-
-        if "SWFT" in key or "SWIFT" in key:
-            return "Speedster SWFT"
-
-    # ASUS family collapsing
-    if manufacturer == "ASUS":
-        if "ROG STRIX" in key:
-            return "ROG Strix"
-
-        if "ROG ASTRAL" in key:
-            return "ROG Astral"
-
-        if "ROG MATRIX" in key:
-            return "ROG Matrix"
-
-        if "TUF" in key:
-            return "TUF Gaming"
-
-        if "DUAL" in key:
-            return "Dual"
-
-    # MSI family collapsing
-    if manufacturer == "MSI":
-        if "VENTUS 3X" in key:
-            return "Ventus 3X"
-
-        if "VENTUS 2X" in key:
-            return "Ventus 2X"
-
-        if "SHADOW 3X" in key:
-            return "Shadow 3X"
-
-        if "SHADOW 2X" in key:
-            return "Shadow 2X"
-
-        if "GAMING TRIO" in key or key == "TRIO":
-            return "Gaming Trio"
 
 
     mappings = {
@@ -279,7 +248,9 @@ def normalize_variant(manufacturer, variant):
             "ROG STRIX GAMING": "ROG Strix",
             "ROG MATRIX": "ROG Matrix",
             "ROG MATRIX PLATINUM": "ROG Matrix Platinum",
+            "ROG ASTRAL HATSUNE MIKU" : "ROG Astral Hatsune Miku",
             "ROG ASTRAL": "ROG Astral",
+            "90YV0LWA-MVAA00": "ROG Astral"
         },
 
         "MSI": {
@@ -329,25 +300,29 @@ def normalize_variant(manufacturer, variant):
             "SPEEDSTER MERC": "Speedster Merc",
             "SPEEDSTER QICK": "Speedster QICK",
             "SPEEDSTER SWFT": "Speedster SWFT",
+            "SPEEDTESTER QICK": "Speedster QICK",
+            "SPEEDTESTER SWFT": "Speedster SWFT",
             "SWFT CORE": "Speedster SWFT Core",
             "SWIFT": "Speedster SWFT",
             "SWIFT GAMING": "Speedster SWFT",
             "SWIFT WHITE GAMING": "Speedster SWFT White",
             "SWIFT PRO GAMING": "Speedster SWFT",
             "SWIFT TRIPLE FAN GAMING": "Speedster SWFT",
+            "SWIFT TRIPLE FAN GAMING EDITON": "Speedster SWFT",
             "SWIFT WHITE TRIPLE FAN GAMING": "Speedster SWFT White",
-            "SPEEDSTER": "Speedster",
+            "SWIFT WHITE TRIPLE FAN GAMING EDITON": "Speedster SWFT White",
             "SPEEDSTER SWFT210": "Speedster SWFT",
             "SPEEDSTER SWFT CORE": "Speedster SWFT Core",
+            "SPEEDSTER SWIFT TRIPLE FAN": "Speedster SWFT",
             "MERCURY TRIPLE FAN": "Mercury",
             "MERCURY TRIPLE FAN GAMING": "Mercury",
             "MERCURY GAMING RGB": "Mercury",
             "MERCURY MAGNETIC AIR": "Mercury",
-            "WHITE GAMING": "White Gaming",
-            "WHITE": "White",
+            "WHITE GAMING EDITION": "Quicksilver White",
+            "WHITE GAMING": "Quicksilver White",
+            "GAMING EDITION": "Quicksilver",
+            "GAMING": "Quicksilver",
             "QICKSILVER": "Quicksilver",
-            "SPEEDTESTER QICK": "Speedster QICK",
-            "SPEEDTESTER SWFT": "Speedster SWFT",
             "MERC": "Speedster Merc",
             "QICK": "Speedster QICK",
             "SWFT WHITE": "Speedster SWFT White",
@@ -436,8 +411,16 @@ def normalize_variant(manufacturer, variant):
 
     key = variant.upper()
 
-    if manufacturer in mappings:
-        return mappings[manufacturer].get(key, variant)
+    manufacturer_map = mappings.get(manufacturer)
+
+    if manufacturer_map:
+        for pattern, normalized in sorted(
+            manufacturer_map.items(),
+            key=lambda item: len(item[0]),
+            reverse=True,
+        ):
+            if pattern in key:
+                return normalized
 
     return variant
 
