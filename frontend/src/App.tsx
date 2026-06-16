@@ -1,147 +1,122 @@
 import { useState, useEffect } from 'react'
+import Pagination from './components/Pagination'
+import GpuTable from './components/GpuTable'
+import type { Gpu, GpuResponse, ActiveFilters } from '../types'
+import FilterPanel from './components/FilterPanel'
 
-interface Listing {
-  storename: string
-  price: number
-  currency: string
-  link: string
-  imageurl: string
-  availabilitystatus: string
-}
 
-interface Gpu {
-  productid: string
-  canonicalname: string
-  brand: string
-  manufacturer_normalized: string
-  model_normalized: string
-  coolervariant_normalized: string
-  vramgb: string
-  boostclock: number | null
-  listings: Listing[]
-  lowestPrice: number | null
-  color: string | null
-  oc: Boolean
-}
-
-interface GpuResponse {
-  page: number
-  limit: number
-  totalCount: number
-  totalPages: number
-  results: Gpu[]
-}
 
 function App() {
   const [data, setData] = useState<GpuResponse | null>(null)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [sort, setSort] = useState('name_asc')
+  const [filters, setFilters] = useState<ActiveFilters>({
+    brand: [], manufacturer: [], model: [], vram: [],
+    memorytype: [], color: [], oc: '', inStock: false,
+    fans: [], buswidth: [], interfaceversion: []
+  })
 
+  // 1. Debounce: wait 300ms after user stops typing before updating debouncedSearch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [search])
+
+  // 2. Fetch: re-runs whenever debouncedSearch or page changes
   useEffect(() => {
     const params = new URLSearchParams()
-    if (search) params.set('search', search)
+    if (debouncedSearch) params.set('search', debouncedSearch)
     params.set('page', page.toString())
+    params.set('sort', sort)
+
+    filters.brand.forEach(v => params.append('brand', v))
+    filters.manufacturer.forEach(v => params.append('manufacturer', v))
+    filters.model.forEach(v => params.append('model', v))
+    filters.vram.forEach(v => params.append('vram', v))
+    filters.memorytype.forEach(v => params.append('memorytype', v))
+    filters.color.forEach(v => params.append('color', v))
+    if (filters.oc) params.set('oc', filters.oc)
+    if (filters.inStock) params.set('inStock', 'true')
+    filters.fans.forEach(v => params.append('fans', v))
+    filters.buswidth.forEach(v => params.append('buswidth', v))
+    filters.interfaceversion.forEach(v => params.append('interfaceversion', v))
+
+    setLoading(true)
+    setError(null)
 
     fetch(`http://localhost:3000/api/gpus?${params.toString()}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Error del servidor: ${res.status}`)
+        return res.json()
+      })
       .then(json => setData(json))
-  }, [search, page])
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [debouncedSearch, page, sort, filters])
 
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-blue-600">GPU Tracker</h1>
-      <input
-        type="text"
-        placeholder="Buscar..."
-        value={search}
-        onChange={e => {
-          setSearch(e.target.value)
+  const toggleSort = (column: 'price' | 'name') => {
+  setSort(prev => {
+    if (prev === `${column}_asc`) return `${column}_desc`
+    return `${column}_asc`
+    })
+    setPage(1)
+  }
+
+return (
+  <div className="p-8">
+    <h1 className="text-3xl font-bold text-blue-600 mb-4">GPU Tracker</h1>
+    
+    <div className="flex gap-8">
+      <FilterPanel
+        filters={filters}
+        onChange={newFilters => {
+          setFilters(newFilters)
           setPage(1)
         }}
-        className="mt-4 border rounded px-3 py-2 w-full max-w-md"
       />
-      {data && (
-        <table className="mt-4 w-full border-collapse">
-          <thead>
-            <tr className="border-b text-left text-sm text-gray-500">
-              <th className="p-2">Nombre</th>
-              <th className="p-2 text-center">Modelo</th>
-              <th className="p-2 text-center">VRAM</th>
-              <th className="p-2 text-center">Boost Clock</th>
-              <th className="p-2 text-center">OC</th>
-              <th className="p-2 text-right">Color</th>
-              <th className="p-2 text-right">Precio</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.results.map(gpu => (
-              <tr key={gpu.productid} className="border-b hover:bg-gray-50">
-                <td className="p-2">
-                  <div className="flex items-center gap-3">
-                    {gpu.listings[0]?.imageurl && (
-                      <img 
-                        src={gpu.listings[0].imageurl} 
-                        alt={gpu.canonicalname}
-                        className="w-16 h-16 object-contain"
-                      />
-                    )}
-                    <div>
-                      <p className="font-semibold">
-                        {gpu.manufacturer_normalized} {gpu.coolervariant_normalized}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-2 text-center text-sm text-gray-600">
-                  {gpu.model_normalized}
-                </td>
-                <td className="p-2 text-center text-sm text-gray-600">
-                  {gpu.vramgb} GB
-                </td>
-                <td className="p-2 text-center text-sm text-gray-600">
-                  {gpu.boostclock ? `${gpu.boostclock} MHz` : '—'}
-                </td>
-                <td className="p-2 text-center text-sm text-gray-600">
-                  {gpu.oc ? 'Sí' : 'No'}
-                </td>
-                <td className="p-2 text-center text-sm text-gray-600">
-                  {gpu.color ? `Blanco` : 'Negro/Gris'}
-                </td>
-                <td className="p-2 text-right font-bold text-lg">
-                  {gpu.lowestPrice ? `$${gpu.lowestPrice.toLocaleString()} MXN` : 'N/A'}
-                </td>
-                
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
 
-      {data && (
-        <div className="mt-4 flex items-center justify-between">
-          <button
-            onClick={() => setPage(p => p - 1)}
-            disabled={page <= 1}
-            className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Anterior
-          </button>
+      <div className="flex-1">
+        <input
+          type="text"
+          placeholder="Buscar..."
+          value={search}
+          onChange={e => {
+            setSearch(e.target.value)
+            setPage(1)
+          }}
+          className="border rounded px-3 py-2 w-full max-w-md"
+        />
 
-          <span className="text-sm text-gray-600">
-            Página {data.page} de {data.totalPages} ({data.totalCount} resultados)
-          </span>
+        {loading && <p className="mt-4 text-gray-500">Cargando...</p>}
+        {error && <p className="mt-4 text-red-500">{error}</p>}
 
-          <button
-            onClick={() => setPage(p => p + 1)}
-            disabled={page >= data.totalPages}
-            className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Siguiente
-          </button>
-        </div>
-      )}
+        {data && (
+          <GpuTable
+            gpus={data.results}
+            sort={sort}
+            onSort={toggleSort}
+          />
+        )}
 
+        {data && (
+          <Pagination
+            page={page}
+            totalPages={data.totalPages}
+            totalCount={data.totalCount}
+            onPrev={() => setPage(p => p - 1)}
+            onNext={() => setPage(p => p + 1)}
+          />
+        )}
+      </div>
     </div>
-  )
+  </div>
+)
 }
 export default App
