@@ -14,10 +14,27 @@ function addCondition(
   }
 }
 
+function addArrayCondition(
+  conditions: string[],
+  values: any[],
+  param: any[],
+  sqlFragment: (placeholder: string) => string
+) {
+  if (param && param.length > 0) {
+    values.push(param)
+    conditions.push(sqlFragment(`$${values.length}`))
+  }
+}
+
+function toArray(param: any): string[] {
+  if (!param) return []
+  if (Array.isArray(param)) return param as string[]
+  return [param as string]
+}
 
 export const getAllGpus = async (req: Request, res: Response) => {
    const {
-    brand, minVram, maxPrice, minPrice, manufacturer, color, inStock,
+    brand, vram, maxPrice, minPrice, manufacturer, color, inStock,
     model, memorytype, oc, buswidth, fans, interfaceversion, boostclock,
     page = '1', limit = '20', sort, search
   } = req.query;
@@ -64,18 +81,25 @@ export const getAllGpus = async (req: Request, res: Response) => {
     const conditions: string[] = [];
     const havingConditions: string[] = [];
     const values: any[] = [];
+    const brandArr = toArray(brand)
+    const manufacturerArr = toArray(manufacturer)
+    const modelArr = toArray(model)
+    const memorytypeArr = toArray(memorytype)
+    const colorArr = toArray(color)
+    const fansArr = toArray(fans)
+    const buswidthArr = toArray(buswidth)
+    const interfaceversionArr = toArray(interfaceversion)
+    const vramArr = toArray(vram)
 
-    addCondition(conditions, values, brand, p => `p.brand = ${p}`);
-    addCondition(conditions, values, manufacturer, p => `p.manufacturer_normalized = ${p}`);
-    addCondition(conditions, values, color, p => `p.color = ${p}`);
-    addCondition(conditions, values, model, p => `p.model_normalized = ${p}`);
-    addCondition(conditions, values, memorytype, p => `p.memorytype = ${p}`);
-    addCondition(conditions, values, buswidth, p => `p.buswidth = ${p}`, Number);
-    addCondition(conditions, values, fans, p => `p.fans = ${p}`, Number);
-    addCondition(conditions, values, interfaceversion, p => `p.interfaceversion = ${p}`);
-    addCondition(conditions, values, boostclock, p => `p.boostclock = ${p}` , Number);
-    addCondition(conditions, values, minVram, p => `p.vramgb >= ${p}`, Number);
-    addCondition(conditions, values, oc, p => `p.oc >= ${p}`);
+    addArrayCondition(conditions, values, brandArr, p => `p.brand = ANY(${p})`);
+    addArrayCondition(conditions, values, manufacturerArr, p => `p.manufacturer_normalized = ANY(${p})`);
+    addArrayCondition(conditions, values, modelArr, p => `p.model_normalized = ANY(${p})`);
+    addArrayCondition(conditions, values, memorytypeArr, p => `p.memorytype = ANY(${p})`);
+    addArrayCondition(conditions, values, colorArr, p => `p.color = ANY(${p})`);
+    addArrayCondition(conditions, values, fansArr, p => `p.fans = ANY(${p}::int[])`);
+    addArrayCondition(conditions, values, buswidthArr, p => `p.buswidth = ANY(${p}::int[])`);
+    addArrayCondition(conditions, values, interfaceversionArr, p => `p.interfaceversion = ANY(${p})`);
+    addArrayCondition(conditions, values, vramArr, p => `p.vramgb::text = ANY(${p})`);
 
     addCondition(havingConditions, values, maxPriceNum, p => 
       `MIN(l.currentprice) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) <= ${p}`);
@@ -269,7 +293,7 @@ export const getGpuFilters = async (req: Request, res: Response) => {
           brands: brandsResult.rows.map((r: any) => r.brand),
           manufacturers: manufacturersResult.rows.map((r: any) => r.manufacturer_normalized),
           colors: colorsResult.rows.map((r: any) => r.color),
-          vramOptions: vramResult.rows.map((r: any) => Number(r.vramgb)),
+          vramOptions: vramResult.rows.map((r: any) => r.vramgb),
           models: modelResult.rows.map((r: any) => r.model_normalized),
           fans: fansResult.rows.map((r: any) => r.fans),
           memoryTypes: memoryTypeResult.rows.map((r: any) => r.memorytype),
