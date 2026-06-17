@@ -227,16 +227,20 @@ export const getGpuById = async (req: Request, res: Response) => {
             p.interfaceversion,
             p.color,
             p.fans,
+            p.oc,
             p.boostclock,
             p.baseclock,
             json_agg(
                 json_build_object(
                 'storename', s.storename,
                 'price', l.currentprice,
+                'shipping', l.shippingprice,
                 'currency', l.currency,
                 'link', l.link,
                 'imageurl', l.imageurl,
-                'availabilitystatus', l.availabilitystatus
+                'availabilitystatus', l.availabilitystatus,
+                'lastseen', l.lastseenat,
+                'currentpriceupdated', l.currentpriceupdatedat
                 ) ORDER BY l.currentprice ASC
             ) AS listings
         FROM product p
