@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import type { Listing, Gpu } from '../types'
 import ddtechLogo from '../assets/store_logos/ddtech.png'
 import cyberpuertaLogo from '../assets/store_logos/cyberpuerta.png'
@@ -22,8 +23,11 @@ const getInStockStores = (listings: Listing[]) => [
 ]
 
 function GpuRow({ gpu }: GpuRowProps) {
+  const navigate = useNavigate()
   return (
-    <tr key={gpu.productid} className="border-b hover:bg-gray-50">
+    <tr key={gpu.productid} 
+        className="border-b hover:bg-gray-50 cursor-pointer"
+        onClick={() => navigate(`/gpu/${gpu.productid}`)}>
       <td className="p-2">
         <div className="flex items-center gap-3">
           {gpu.listings[0]?.imageurl && (
@@ -55,7 +59,7 @@ function GpuRow({ gpu }: GpuRowProps) {
       <td className="p-2">
         <div className="flex items-center justify-center gap-1">
           {getInStockStores(gpu.listings).length === 0 
-            ? <span className="text-xs text-red-500 font-bold">Sin stock</span>
+            ? <span className="text-xs text-red-500 font-bold">Agotado</span>
             : getInStockStores(gpu.listings).map(l => storeLogos[l.storename] && (
                 <img
                   key={l.storename}
