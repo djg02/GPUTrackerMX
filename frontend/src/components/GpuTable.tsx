@@ -10,7 +10,7 @@ interface GpuTableProps {
 function GpuTable({ gpus, sort, onSort }: GpuTableProps) {
   return (
     <table className="mt-4 w-full border-collapse">
-      <thead>
+      <thead className="hidden md:table-header-group">
         <tr className="border-b text-left text-sm text-gray-500">
           <th
             className="p-2 text-left cursor-pointer select-none hover:text-gray-800"

@@ -48,7 +48,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
     }`
 
   return (
-    <div className="w-48 shrink-0 text-sm">
+    <div className="w-full md:w-64 md:shrink-0">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-bold text-gray-700">Filtros</h2>
         <button onClick={reset} className="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors">

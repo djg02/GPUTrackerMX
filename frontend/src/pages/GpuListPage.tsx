@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
+import type {GpuResponse, ActiveFilters } from '../types'
 import Pagination from '../components/Pagination'
 import GpuTable from '../components/GpuTable'
-import type {GpuResponse, ActiveFilters } from '../types'
 import FilterPanel from '../components/FilterPanel'
+import SortMenu from '../components/SortMenu'
 
 
 function filtersFromParams(params: URLSearchParams): ActiveFilters {
@@ -32,6 +33,7 @@ function GpuListPage() {
     const [debouncedSearch, setDebouncedSearch] = useState('')
     const sort = searchParams.get('sort') || 'name_asc'
     const filters = filtersFromParams(searchParams)
+    const [isFilterOpen, setIsFilterOpen] = useState(false)
 
     // 1. Debounce: wait 300ms after user stops typing before updating debouncedSearch
     useEffect(() => {
@@ -74,6 +76,19 @@ function GpuListPage() {
         .finally(() => setLoading(false))
     }, [debouncedSearch, searchParams.toString()])
 
+    //prevents main page from scrolling while in filter menu
+    useEffect(() => {
+        if (isFilterOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+
+        return () => {
+            document.body.style.overflow = ''
+        }
+        }, [isFilterOpen])
+
         const toggleSort = (column: 'price' | 'name') => {
             const newSort = sort === `${column}_asc` ? `${column}_desc` : `${column}_asc`
             setSearchParams(prev => {
@@ -83,14 +98,46 @@ function GpuListPage() {
                 return next
             })
         }
+        const setSortValue = (newSort: string) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev)
+            next.set('sort', newSort)
+            next.set('page', '1')
+            return next
+        })
+        }
 
     return (
     <div className="p-8">
         <Link to="/">
         <h1 className="text-3xl font-bold text-blue-600 mb-4 cursor-pointer hover:text-blue-700">GPU Tracker</h1>
         </Link>
-        
-        <div className="flex gap-8">
+        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex gap-2 mb-4 md:hidden">
+            {/* Mobile filter toggle button */}
+            <button
+                onClick={() => setIsFilterOpen(true)}
+                className="border rounded-full px-4 py-1 text-xs text-gray-600 hover:bg-gray-50"
+            >
+                Filtros
+            </button>
+            {/* Mobile sort toggle button */}
+            <SortMenu sort={sort} onSortChange={setSortValue} />
+        </div>
+            {/* Filter panel: always visible on desktop, overlay on mobile when open */}
+            <div className={`
+                ${isFilterOpen ? 'fixed inset-0 z-50 bg-white p-6 overflow-y-auto' : 'hidden'}
+                md:block md:static md:bg-transparent md:p-0
+            `}>
+                {isFilterOpen && (
+                <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="md:hidden mb-4 text-blue-600"
+                >
+                    ✕ Cerrar
+                </button>
+                )}
+
         <FilterPanel
             filters={filters}
             onChange={newFilters => {
@@ -117,7 +164,7 @@ function GpuListPage() {
             })
         }}
         />
-
+        </div>
         <div className="flex-1">
             <input
                 type="text"
