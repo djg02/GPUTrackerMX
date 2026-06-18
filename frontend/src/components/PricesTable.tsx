@@ -2,11 +2,13 @@ import type { Listing } from '../types'
 import ddtechLogo from '../assets/store_logos/ddtech.png'
 import cyberpuertaLogo from '../assets/store_logos/cyberpuerta.png'
 import digitalifeLogo from '../assets/store_logos/digitalife.png'
+import pcelLogo from '../assets/store_logos/pcel.png'
 
 const storeLogos: Record<string, string> = {
   'DDTech': ddtechLogo,
   'Cyberpuerta': cyberpuertaLogo,
   'digitalife': digitalifeLogo,
+  'PCEL' : pcelLogo,
 }
 
 function timeAgo(isoDate: string): string {

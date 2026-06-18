@@ -48,7 +48,7 @@ def normalize_model(model):
 
     # RX7700XT -> RX 7700 XT
     model = re.sub(
-        r"RX\s*(\d{4})(XT|XTX|GRE)\b",
+        r"RX\s*(\d{4})(XTX|XT|GRE)\b",
         r"RX \1 \2",
         model,
         flags=re.I
@@ -260,11 +260,13 @@ def normalize_variant(manufacturer, variant):
             "VENTUS 3X": "Ventus 3X",
             "VENTUS 3X PLUS": "Ventus 3X Plus",
             "GAMING TRIO": "Gaming Trio",
+            "GAMING TRIO PLUS": "Gaming Trio Plus",
             "GAMING TRIO WHITE": "Gaming Trio White",
             "GAMING X": "Gaming X",
             "SHADOW 2X": "Shadow 2X",
             "SHADOW 3X": "Shadow 3X",
             "INSPIRE 3X": "Inspire 3X",
+            "INSPIRE 3X PLUS": "Inspire 3X Plus",
             "LIGHTNING Z": "Lightning Z",
             "VANGUARD SOC": "Vanguard SOC",
             "LOW PROFILE": "Low Profile",
@@ -393,6 +395,7 @@ def normalize_variant(manufacturer, variant):
             "TWIN X2": "Twin X2",
             "TWIN X2 WHITE": "Twin X2 White",
             "X3": "X3",
+            "ICHILL X3": "Ichill X3",
         },
 
         "EVGA": {
