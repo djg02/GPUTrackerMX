@@ -121,13 +121,13 @@ function GpuListPage() {
 
 
     return (
-    <div className="p-8">
+    <div className="p-8 bg-gray-900 min-h-screen">
         <div className="flex flex-col md:flex-row gap-8">
         <div className="flex gap-2 mb-4 md:hidden">
             {/* Mobile filter toggle button */}
             <button
                 onClick={() => setIsFilterOpen(true)}
-                className="border rounded-full px-4 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                className="border border-gray-700 rounded-full px-4 py-1 text-xs text-gray-400 hover:border-orange-500 hover:text-orange-500"
             >
                 Filtros
             </button>
@@ -136,13 +136,13 @@ function GpuListPage() {
         </div>
             {/* Filter panel: always visible on desktop, overlay on mobile when open */}
             <div className={`
-                ${isFilterOpen ? 'fixed inset-0 z-50 bg-white p-6 overflow-y-auto' : 'hidden'}
+                ${isFilterOpen ? 'fixed inset-0 z-50 bg-gray-900 p-6 overflow-y-auto' : 'hidden'}
                 md:block md:static md:bg-transparent md:p-0
             `}>
                 {isFilterOpen && (
                 <button
                     onClick={() => setIsFilterOpen(false)}
-                    className="md:hidden mb-4 text-blue-600"
+                    className="md:hidden mb-4 text-orange-500"
                 >
                     ✕ Cerrar
                 </button>
@@ -181,7 +181,7 @@ function GpuListPage() {
                 placeholder="Buscar..."
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
-                className="border rounded px-3 py-2 flex-1 max-w-md"
+                 className="border border-gray-700 rounded px-3 py-2 flex-1 max-w-md bg-gray-800 text-gray-50 placeholder-gray-400 focus:outline-none focus:border-orange-500"
             />
 
             {loading && <p className="mt-4 text-gray-500">Cargando...</p>}

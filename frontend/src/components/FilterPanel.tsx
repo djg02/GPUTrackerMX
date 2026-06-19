@@ -40,18 +40,20 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
     })
   }
 
-  if (!options) return <div className="w-48 text-sm text-gray-400">Cargando filtros...</div>
+  if (!options) return <div className="text-xs text-gray-500 hover:text-orange-500">Cargando filtros...</div>
 
-  const buttonClass = (active: boolean) =>
-    `px-3 py-1 rounded-full border text-xs ${
-      active ? 'bg-blue-600 text-white border-blue-600' : 'text-gray-600 hover:bg-gray-50'
-    }`
+const buttonClass = (active: boolean) =>
+  `px-3 py-1 rounded-full border text-xs ${
+    active 
+      ? 'bg-orange-500 text-white border-orange-500' 
+      : 'text-gray-400 border-gray-700 hover:border-orange-500 hover:text-orange-500'
+  }`
 
   return (
     <div className="w-full md:w-64 md:shrink-0">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-bold text-gray-700">Filtros</h2>
-        <button onClick={reset} className="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors">
+        <h2 className="font-bold text-gray-200">Filtros</h2>
+        <button onClick={reset} className="px-3 py-1 text-xs font-medium text-red-400 bg-darkblue-800 border border-gray-700 rounded-md hover:border-orange-600 ">
           Reiniciar Filtros
         </button>
       </div>
@@ -63,7 +65,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-500 mb-1">Marca</label>
+        <label className="block text-gray-400 mb-1">Marca</label>
         <div className="flex flex-wrap gap-1">
           {options.brands.map(b => (
             <button key={b} onClick={() => toggleArrayValue('brand', b)} className={buttonClass(filters.brand.includes(b))}>
@@ -74,7 +76,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-500 mb-1">Tipo de memoria</label>
+        <label className="block text-gray-400 mb-1">Tipo de memoria</label>
         <div className="flex flex-wrap gap-1">
           {options.memoryTypes.map(t => (
             <button key={t} onClick={() => toggleArrayValue('memorytype', t)} className={buttonClass(filters.memorytype.includes(t))}>
@@ -85,7 +87,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-500 mb-1">Overclock</label>
+        <label className="block text-gray-400 mb-1">Overclock</label>
         <div className="flex flex-wrap gap-1">
           {['true', 'false'].map(val => (
             <button key={val} onClick={() => setOc(val)} className={buttonClass(filters.oc === val)}>
@@ -96,7 +98,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-500 mb-1">Fabricante</label>
+        <label className="block text-gray-400 mb-1">Fabricante</label>
         <div className="flex flex-wrap gap-1">
           {options.manufacturers.map(m => (
             <button key={m} onClick={() => toggleArrayValue('manufacturer', m)} className={buttonClass(filters.manufacturer.includes(m))}>
@@ -107,27 +109,28 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </div>
 
         <div className="mb-4">
-        <label className="block text-gray-500 mb-1">Modelo</label>
-        <div className="h-52 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-500">
+        <label className="block text-gray-400 mb-1">Modelo</label>
+        <div className="border border-gray-700 rounded px-2 py-1 h-50 overflow-y-auto bg-darkblue-800 scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-800">
             {options.models.map(m => (
-            <label key={m} className="flex items-center gap-2 py-0.5 cursor-pointer">
-                <input
+            <label key={m} className="flex items-center gap-2 py-0.5 cursor-pointer text-gray-300 hover:text-orange-500">
+              <input
                 type="checkbox"
                 checked={filters.model.includes(m)}
                 onChange={() => toggleArrayValue('model', m)}
+                className="accent-orange-500 border-orange-500 bg-orange-200"
                 />
                 {m}
-            </label>
+              </label>
             ))}
         </div>
             <button
                 onClick={() => onChange({ ...filters, model: [] })}
-                className="text-xs text-gray-400 hover:text-gray-600  " > Limpiar
+                className="text-xs text-gray-300 hover:text-orange-500  " > Limpiar
             </button>
         </div>
 
       <div className="mb-4">
-        <label className="block text-gray-500 mb-1">VRAM</label>
+        <label className="block text-gray-400 mb-1">VRAM</label>
         <div className="flex flex-wrap gap-1">
           {options.vramOptions.map(v => (
             <button key={v} onClick={() => toggleArrayValue('vram', v)} className={buttonClass(filters.vram.includes(v))}>
@@ -138,7 +141,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-500 mb-1">Color</label>
+        <label className="block text-gray-400 mb-1">Color</label>
         <div className="flex flex-wrap gap-1">
           {options.colors.map(c => (
             <button key={c} onClick={() => toggleArrayValue('color', c)} className={buttonClass(filters.color.includes(c))}>
@@ -148,14 +151,15 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
         </div>
       </div>
 
-      <button onClick={() => setShowAdvanced(p => !p)} className="text-blue-500 text-xs mb-3">
+      <button onClick={() => setShowAdvanced(p => !p)} 
+        className="text-orange-500 text-xs mb-3 hover:text-orange-400">
         {showAdvanced ? '▲ Ocultar avanzados' : '▼ Filtros avanzados'}
       </button>
 
       {showAdvanced && (
         <>
           <div className="mb-4">
-            <label className="block text-gray-500 mb-1">Ventiladores</label>
+            <label className="block text-gray-400 mb-1">Ventiladores</label>
             <div className="flex flex-wrap gap-1">
               {options.fans.map(f => (
                 <button key={f} onClick={() => toggleArrayValue('fans', f.toString())} className={buttonClass(filters.fans.includes(f.toString()))}>
@@ -166,7 +170,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-500 mb-1">Bus</label>
+            <label className="block text-gray-400 mb-1">Bus</label>
             <div className="flex flex-wrap gap-1">
               {options.buswidths.map(b => (
                 <button key={b} onClick={() => toggleArrayValue('buswidth', b.toString())} className={buttonClass(filters.buswidth.includes(b.toString()))}>
@@ -177,7 +181,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-500 mb-1">PCIe</label>
+            <label className="block text-gray-400 mb-1">PCIe</label>
             <div className="flex flex-wrap gap-1">
               {options.interfaceVersions.map(i => (
                 <button key={i} onClick={() => toggleArrayValue('interfaceversion', i)} className={buttonClass(filters.interfaceversion.includes(i))}>

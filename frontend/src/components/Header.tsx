@@ -3,14 +3,22 @@ import logo from '../assets/logos/logo.png'
 
 function Header() {
   return (
-    <header className="border-b px-8 py-4 flex items-center gap-3">
-      <Link to="/" className="flex items-center gap-3 hover:opacity-80">
-        <img src={logo} alt="GPU Tracker MX" className="h-20 w-auto" />
-        <span 
-        className="text-7xl font-bold text-blue-600"
-        style={{ fontFamily: 'Geo', fontStyle: 'italic' }}
+    <header className="border-b border-gray-700 px-8 py-4 bg-gray-900">
+      <Link
+        to="/"
+        className="flex flex-col items-center gap-2 sm:flex-row"
+      >
+        <img
+          src={logo}
+          alt="GPU Tracker MX"
+          className="h-20 w-auto"
+        />
+
+        <span
+          className="text-4xl sm:text-7xl font-bold text-orange-500 text-center sm:text-left"
+          style={{ fontFamily: 'Geo', fontStyle: 'italic' }}
         >
-            Tracker MX
+          Tracker MX
         </span>
       </Link>
     </header>

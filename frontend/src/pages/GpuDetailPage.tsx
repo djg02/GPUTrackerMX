@@ -31,14 +31,14 @@ function GpuDetailPage() {
 
   return (
     
-    <div className="p-8">
+    <div className="p-8 bg-gray-900 min-h-screen">
         <button 
           onClick={() => navigate(-1)}
-          className="text-blue-600 hover:underline text-sm"
+          className="text-orange-500 hover:text-orange-400 text-sm"
         >
           &larr; Volver al listado
         </button>
-    <h1 className="text-2xl font-bold mt-4">{gpu.canonicalname}</h1>
+     <h1 className="text-2xl font-bold mt-4 text-gray-50">{gpu.canonicalname}</h1>
 
     <div className="flex flex-col md:flex-row gap-8 mt-6">
         <SpecsSidebar gpu={gpu} />

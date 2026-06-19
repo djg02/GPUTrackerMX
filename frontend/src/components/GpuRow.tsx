@@ -32,7 +32,7 @@ function GpuRow({ gpu }: GpuRowProps) {
     <>
       {/* Desktop row - only show at lg+ */}
       <tr 
-        className="hidden lg:table-row border-b hover:bg-gray-50 cursor-pointer"
+        className="hidden lg:table-row border-b border-gray-700 hover:bg-gray-800 cursor-pointer"
         onClick={() => navigate(`/gpu/${gpu.productid}`)}
       >
         <td className="p-2">
@@ -45,22 +45,22 @@ function GpuRow({ gpu }: GpuRowProps) {
               />
             )}
             <div>
-              <p className="font-semibold">
+               <p className="font-semibold text-gray-50">
                 {gpu.manufacturer_normalized} {gpu.coolervariant_normalized}
               </p>
             </div>
           </div>
         </td>
-        <td className="p-2 text-center text-sm text-gray-600">
+        <td className="p-2 text-center text-sm text-gray-400">
           {gpu.model_normalized}
         </td>
-        <td className="p-2 text-center text-sm text-gray-600">
+        <td className="p-2 text-center text-sm text-gray-400">
           {gpu.vramgb} GB
         </td>
-        <td className="p-2 text-center text-sm text-gray-600">
+        <td className="p-2 text-center text-sm text-gray-400">
           {gpu.boostclock ? `${gpu.boostclock} MHz` : '—'}
         </td>
-        <td className="p-2 text-center text-sm text-gray-600">
+        <td className="p-2 text-center text-sm text-gray-400">
           {gpu.oc ? 'Sí' : 'No'}
         </td>
         <td className="p-2">
@@ -81,17 +81,17 @@ function GpuRow({ gpu }: GpuRowProps) {
             )
           }
         </td>
-        <td className="p-2 text-center text-sm text-gray-600">
+        <td className="p-2 text-center text-sm text-gray-400">
           {gpu.color ? 'Blanco' : 'Negro/Gris'}
         </td>
-        <td className="p-2 text-right font-bold text-lg">
+        <td className="p-2 text-right font-bold text-lg text-orange-500">
           {gpu.lowestPrice ? `$${gpu.lowestPrice.toLocaleString()} MXN` : 'N/A'}
         </td>
       </tr>
 
       {/* Mobile - show below lg */}
       <div
-        className="lg:hidden border rounded-lg p-3 mb-3 cursor-pointer hover:bg-gray-50"
+        className="lg:hidden border border-gray-700 rounded-lg p-3 mb-3 cursor-pointer bg-gray-800 hover:bg-gray-900"
         onClick={() => navigate(`/gpu/${gpu.productid}`)}
       >
         <div className="flex gap-3">
@@ -106,26 +106,26 @@ function GpuRow({ gpu }: GpuRowProps) {
             <p className="font-semibold">
               {gpu.manufacturer_normalized} {gpu.coolervariant_normalized}
             </p>
-            <p className="text-sm text-gray-500">{gpu.model_normalized}</p>
+            <p className="text-sm text-gray-400">{gpu.model_normalized}</p>
 
             <div className="mt-2 text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-gray-500">VRAM</span>
-                <span>{gpu.vramgb} GB</span>
+                <span className="text-gray-300">{gpu.vramgb} GB</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Overclock</span>
-                <span>{gpu.oc ? 'Sí' : 'No'}</span>
+                <span className="text-gray-300">{gpu.oc ? 'Sí' : 'No'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Color</span>
-                <span>{gpu.color ? 'Blanco' : 'Negro/Gris'}</span>
+                <span className="text-gray-300">{gpu.color ? 'Blanco' : 'Negro/Gris'}</span>
             </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-3 pt-3 border-t">
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-700">
           <div className="flex items-center gap-1">
           {inStockStores.length === 0
             ? <span className="text-xs text-red-500 font-bold">Sin stock</span>
@@ -145,7 +145,7 @@ function GpuRow({ gpu }: GpuRowProps) {
             )
           }
           </div>
-          <span className="font-bold text-lg">
+          <span className="font-bold text-lg text-orange-500">
             {gpu.lowestPrice ? `$${gpu.lowestPrice.toLocaleString()} MXN` : 'N/A'}
           </span>
         </div>
