@@ -109,9 +109,6 @@ function GpuListPage() {
 
     return (
     <div className="p-8">
-        <Link to="/">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4 cursor-pointer hover:text-blue-700">GPU Tracker</h1>
-        </Link>
         <div className="flex flex-col md:flex-row gap-8">
         <div className="flex gap-2 mb-4 md:hidden">
             {/* Mobile filter toggle button */}
