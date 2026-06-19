@@ -30,9 +30,9 @@ function GpuRow({ gpu }: GpuRowProps) {
 
   return (
     <>
-      {/* Desktop row */}
+      {/* Desktop row - only show at lg+ */}
       <tr 
-        className="hidden md:table-row border-b hover:bg-gray-50 cursor-pointer"
+        className="hidden lg:table-row border-b hover:bg-gray-50 cursor-pointer"
         onClick={() => navigate(`/gpu/${gpu.productid}`)}
       >
         <td className="p-2">
@@ -64,20 +64,22 @@ function GpuRow({ gpu }: GpuRowProps) {
           {gpu.oc ? 'Sí' : 'No'}
         </td>
         <td className="p-2">
-          <div className="flex items-center justify-center gap-1">
-            {inStockStores.length === 0 
-              ? <span className="text-xs text-red-500 font-bold">Sin stock</span>
-              : inStockStores.map(l => storeLogos[l.storename] && (
+          {inStockStores.length === 0 
+            ? <span className="text-xs text-red-500 font-bold">Sin stock</span>
+            : (
+              <div className="flex flex-wrap justify-center gap-1 max-w-[80px] mx-auto ">
+                {inStockStores.map(l => storeLogos[l.storename] && (
                   <img
                     key={l.link}
                     src={storeLogos[l.storename]}
                     alt={l.storename}
                     title={l.storename}
-                    className="w-6 h-6 object-contain"
+                    className="w-6 h-6 object-contain rounded-lg"
                   />
-                ))
-            }
-          </div>
+                ))}
+              </div>
+            )
+          }
         </td>
         <td className="p-2 text-center text-sm text-gray-600">
           {gpu.color ? 'Blanco' : 'Negro/Gris'}
@@ -87,9 +89,9 @@ function GpuRow({ gpu }: GpuRowProps) {
         </td>
       </tr>
 
-      {/* Mobile card */}
+      {/* Mobile - show below lg */}
       <div
-        className="md:hidden border rounded-lg p-3 mb-3 cursor-pointer hover:bg-gray-50"
+        className="lg:hidden border rounded-lg p-3 mb-3 cursor-pointer hover:bg-gray-50"
         onClick={() => navigate(`/gpu/${gpu.productid}`)}
       >
         <div className="flex gap-3">
@@ -136,7 +138,7 @@ function GpuRow({ gpu }: GpuRowProps) {
                     src={storeLogos[l.storename]}
                     alt={l.storename}
                     title={l.storename}
-                    className="w-6 h-6 object-contain"
+                    className="w-6 h-6 object-contain rounded-lg"
                   />
                 ))}
               </>

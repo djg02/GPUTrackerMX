@@ -30,24 +30,33 @@ function GpuListPage() {
     const page = Number(searchParams.get('page')) || 1
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [debouncedSearch, setDebouncedSearch] = useState('')
     const sort = searchParams.get('sort') || 'name_asc'
     const filters = filtersFromParams(searchParams)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
+    const [inputValue, setInputValue] = useState(search)
 
     // 1. Debounce: wait 300ms after user stops typing before updating debouncedSearch
     useEffect(() => {
-        const timer = setTimeout(() => {
-        setDebouncedSearch(search)
-        }, 300)
+    const timer = setTimeout(() => {
+        setSearchParams(prev => {
+        const next = new URLSearchParams(prev)
+        if (inputValue) {
+            next.set('search', inputValue)
+        } else {
+            next.delete('search')
+        }
+        next.set('page', '1')
+        return next
+        })
+    }, 300)
 
-        return () => clearTimeout(timer)
-    }, [search])
+    return () => clearTimeout(timer)
+    }, [inputValue])
 
     // 2. Fetch: re-runs whenever debouncedSearch or page changes
     useEffect(() => {
         const params = new URLSearchParams()
-        if (debouncedSearch) params.set('search', debouncedSearch)
+        if (search) params.set('search', search)
         params.set('page', page.toString())
         params.set('sort', sort)
 
@@ -74,7 +83,7 @@ function GpuListPage() {
         .then(json => setData(json))
         .catch(err => setError(err.message))
         .finally(() => setLoading(false))
-    }, [debouncedSearch, searchParams.toString()])
+    }, [search, searchParams.toString()])
 
     //prevents main page from scrolling while in filter menu
     useEffect(() => {
@@ -106,6 +115,10 @@ function GpuListPage() {
             return next
         })
         }
+        useEffect(() => {
+            setInputValue(search)
+        }, [search])
+
 
     return (
     <div className="p-8">
@@ -166,20 +179,9 @@ function GpuListPage() {
             <input
                 type="text"
                 placeholder="Buscar..."
-                value={search}
-                onChange={e => {
-                    setSearchParams(prev => {
-                        const next = new URLSearchParams(prev)
-                        if (e.target.value) {
-                        next.set('search', e.target.value)
-                        } else {
-                        next.delete('search')
-                        }
-                        next.set('page', '1')
-                        return next
-                    })
-                    }}
-                className="border rounded px-3 py-2 w-full max-w-md"
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                className="border rounded px-3 py-2 flex-1 max-w-md"
             />
 
             {loading && <p className="mt-4 text-gray-500">Cargando...</p>}

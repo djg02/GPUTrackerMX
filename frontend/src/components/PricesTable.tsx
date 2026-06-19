@@ -31,9 +31,9 @@ function PricesTable({ listings }: PricesTableProps) {
     <div className="flex-1">
       <h2 className="font-semibold mb-2">Precios</h2>
 
-      {/* Desktop table */}
+      {/* Desktop table - only show at lg+ */}
       <div className="overflow-x-auto">
-        <table className="hidden md:table w-full border-collapse">
+        <table className="hidden lg:table w-full border-collapse">
           <thead>
             <tr className="border-b text-left text-sm text-gray-500">
               <th className="p-2">Tienda</th>
@@ -49,7 +49,7 @@ function PricesTable({ listings }: PricesTableProps) {
                 <td className="p-2">
                   <a href={listing.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                     {storeLogos[listing.storename] && (
-                      <img src={storeLogos[listing.storename]} alt={listing.storename} className="w-6 h-6 object-contain" />
+                      <img src={storeLogos[listing.storename]} alt={listing.storename} className="w-6 h-6 object-contain rounded-lg" />
                     )}
                     {listing.storename}
                   </a>
@@ -80,8 +80,8 @@ function PricesTable({ listings }: PricesTableProps) {
         </table>
       </div>
 
-      {/* Mobile cards */}
-      <div className="md:hidden space-y-3">
+      {/* Mobile cards - show below lg */}
+      <div className="lg:hidden space-y-3">
         {listings.map(listing => (
           <a
             key={listing.link}
@@ -93,7 +93,7 @@ function PricesTable({ listings }: PricesTableProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {storeLogos[listing.storename] && (
-                  <img src={storeLogos[listing.storename]} alt={listing.storename} className="w-6 h-6 object-contain" />
+                  <img src={storeLogos[listing.storename]} alt={listing.storename} className="w-6 h-6 object-contain rounded-lg" />
                 )}
                 <span className="font-semibold">{listing.storename}</span>
               </div>

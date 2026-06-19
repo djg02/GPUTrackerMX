@@ -241,7 +241,7 @@ export const getGpuById = async (req: Request, res: Response) => {
                 'availabilitystatus', l.availabilitystatus,
                 'lastseen', l.lastseenat,
                 'currentpriceupdated', l.currentpriceupdatedat
-                ) ORDER BY l.currentprice ASC
+                ) ORDER BY (l.currentprice + COALESCE(l.shippingprice, 0)) ASC
             ) AS listings
         FROM product p
         LEFT JOIN product_listing_match m ON m.productid = p.productid

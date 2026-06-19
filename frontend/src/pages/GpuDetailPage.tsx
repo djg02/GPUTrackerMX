@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import type { Gpu } from '../types'
 import SpecsSidebar from '../components/SpecsSidebar'
 import PricesTable from '../components/PricesTable'
@@ -9,6 +9,7 @@ function GpuDetailPage() {
   const [gpu, setGpu] = useState<Gpu | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     setLoading(true)
@@ -31,8 +32,12 @@ function GpuDetailPage() {
   return (
     
     <div className="p-8">
-        <Link to="/" className="text-blue-600 hover:underline">&larr; Volver al listado</Link>
-
+        <button 
+          onClick={() => navigate(-1)}
+          className="text-blue-600 hover:underline text-sm"
+        >
+          &larr; Volver al listado
+        </button>
     <h1 className="text-2xl font-bold mt-4">{gpu.canonicalname}</h1>
 
     <div className="flex flex-col md:flex-row gap-8 mt-6">
