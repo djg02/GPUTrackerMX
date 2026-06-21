@@ -75,7 +75,7 @@ function GpuListPage() {
         setLoading(true)
         setError(null)
 
-        fetch(`http://localhost:3000/api/gpus?${params.toString()}`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/gpus?${params.toString()}`)
         .then(res => {
             if (!res.ok) throw new Error(`Error del servidor: ${res.status}`)
             return res.json()
@@ -123,17 +123,8 @@ function GpuListPage() {
     return (
     <div className="p-8 bg-gray-900 min-h-screen">
         <div className="flex flex-col md:flex-row gap-8">
-        <div className="flex gap-2 mb-4 md:hidden">
-            {/* Mobile filter toggle button */}
-            <button
-                onClick={() => setIsFilterOpen(true)}
-                className="border border-gray-700 rounded-full px-4 py-1 text-xs text-gray-400 hover:border-orange-500 hover:text-orange-500"
-            >
-                Filtros
-            </button>
-            {/* Mobile sort toggle button */}
-            <SortMenu sort={sort} onSortChange={setSortValue} />
-        </div>
+        <div className="flex gap-2 mb-4">
+            </div>
             {/* Filter panel: always visible on desktop, overlay on mobile when open */}
             <div className={`
                 ${isFilterOpen ? 'fixed inset-0 z-50 bg-gray-900 p-6 overflow-y-auto' : 'hidden'}
@@ -176,14 +167,26 @@ function GpuListPage() {
         />
         </div>
         <div className="flex-1">
-            <input
-                type="text"
-                placeholder="Buscar..."
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                 className="border border-gray-700 rounded px-3 py-2 flex-1 max-w-md bg-gray-800 text-gray-50 placeholder-gray-400 focus:outline-none focus:border-orange-500"
-            />
-
+            <div className="flex items-center gap-2">
+                <input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                    className="border border-gray-700 rounded px-1 py-2 flex-2 min-w-0 max-w-md bg-gray-800 text-gray-50 placeholder-gray-400 focus:outline-none focus:border-orange-500"
+                />
+                {/* Sort button - hides once table headers appear at lg */}
+                <div className="lg:hidden">
+                    <SortMenu sort={sort} onSortChange={setSortValue} />
+                </div>
+                  {/* Mobile filter toggle button - hides once sidebar appears at md */}
+                <button
+                    onClick={() => setIsFilterOpen(true)}
+                    className="md:hidden border border-gray-700 rounded-full px-2 py-1 text-xs text-gray-400 hover:border-orange-500 hover:text-orange-500"
+                >
+                    Filtros
+                </button>
+            </div>
             {loading && <p className="mt-4 text-gray-500">Cargando...</p>}
             {error && <p className="mt-4 text-red-500">{error}</p>}
 

@@ -70,8 +70,8 @@ export const getAllGpus = async (req: Request, res: Response) => {
     const offset = (pageNum - 1) * limitNum;
 
     const sortOptions: Record<string, string> = {
-      price_asc: 'MIN(l.currentprice) ASC',
-      price_desc: 'MIN(l.currentprice) DESC',
+      price_asc: `MIN(l.currentprice + COALESCE(l.shippingprice, 0)) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) ASC NULLS LAST`,
+      price_desc: `MIN(l.currentprice + COALESCE(l.shippingprice, 0)) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) DESC NULLS LAST`,
       name_asc: 'p.canonicalname ASC',
       name_desc: 'p.canonicalname DESC',
     };
@@ -161,7 +161,8 @@ export const getAllGpus = async (req: Request, res: Response) => {
                 'currency', l.currency,
                 'link', l.link,
                 'imageurl', l.imageurl,
-                'availabilitystatus', l.availabilitystatus
+                'availabilitystatus', l.availabilitystatus,
+                'shippingprice', l.shippingprice
                 ) ORDER BY l.currentprice ASC
             ) AS listings
         FROM product p
@@ -184,7 +185,7 @@ export const getAllGpus = async (req: Request, res: Response) => {
             (l: any) => l.availabilitystatus === 'InStock' || l.availabilitystatus === 'Available'
           );
           const source = inStockListings.length > 0 ? inStockListings : product.listings;
-          lowestPrice = source[0].price; // already sorted by price ASC from SQL
+          lowestPrice = source[0].price + (source[0].shippingprice ?? 0); // already sorted by price ASC from SQL
         }
 
         return {

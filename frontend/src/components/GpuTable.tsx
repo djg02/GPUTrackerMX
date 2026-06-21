@@ -11,9 +11,9 @@ function GpuTable({ gpus, sort, onSort }: GpuTableProps) {
   return (
     <table className="mt-4 w-full border-collapse">
       <thead className="hidden lg:table-header-group">
-        <tr className="border-b text-left text-sm text-gray-500">
+        <tr className="border-b border-gray-700 text-left text-sm text-gray-400">
           <th
-            className="p-2 text-left cursor-pointer select-none hover:text-gray-800"
+            className="p-2 text-left cursor-pointer select-none hover:text-orange-500"
             onClick={() => onSort('name')}
           >
             Nombre {sort === 'name_asc' ? '▲' : sort === 'name_desc' ? '▼' : ''}
@@ -25,7 +25,7 @@ function GpuTable({ gpus, sort, onSort }: GpuTableProps) {
           <th className="p-2 text-center">En Stock</th>
           <th className="p-2 text-center">Color</th>
           <th
-            className="p-2 text-right cursor-pointer select-none hover:text-gray-800"
+            className="p-2 text-right cursor-pointer select-none hover:text-orange-500"
             onClick={() => onSort('price')}
           >
             Precio {sort === 'price_asc' ? '▲' : sort === 'price_desc' ? '▼' : ''}
