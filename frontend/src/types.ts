@@ -50,6 +50,8 @@ export interface FilterOptions {
   ocOptions: boolean[]
   buswidths: number[]
   interfaceVersions: string[]
+  minPrice: number
+  maxPrice: number
 }
 
 export interface ActiveFilters {
@@ -64,4 +66,6 @@ export interface ActiveFilters {
   fans: string[]
   buswidth: string[]
   interfaceversion: string[]
+  minPrice: string
+  maxPrice: string
 }

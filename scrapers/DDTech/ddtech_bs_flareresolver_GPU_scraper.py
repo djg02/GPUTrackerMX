@@ -113,8 +113,17 @@ def run():
                         ON CONFLICT (StoreId, StoreListingId) DO UPDATE SET
                             CurrentPrice = EXCLUDED.CurrentPrice,
                             LastseenAt = NOW(),
-                            AvailabilityStatus = EXCLUDED.AvailabilityStatus;
+                            AvailabilityStatus = EXCLUDED.AvailabilityStatus
+                        RETURNING listingid;
                     """, (product_id, 1, title, url, price, img_url, availability, json.dumps({}), "MXN"))
+
+                    listingid = cursor.fetchone()[0]
+
+                    cursor.execute("""
+                        INSERT INTO pricesnapshot (listingid, currency, price, capturedat, shippingprice)
+                        VALUES (%s, %s, %s, NOW(), %s);
+                    """, (listingid, "MXN", price, None))
+
                     conn.commit()
                     print(f"Saved: {title} (${price})")
 

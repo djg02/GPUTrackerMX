@@ -28,6 +28,10 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
     onChange({ ...filters, oc: filters.oc === value ? '' : value })
   }
 
+  const update = (key: keyof ActiveFilters, value: string) => {
+  onChange({ ...filters, [key]: value })
+  }
+
   const toggleInStock = () => {
     onChange({ ...filters, inStock: !filters.inStock })
   }
@@ -36,7 +40,8 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
     onChange({
       brand: [], manufacturer: [], model: [], vram: [],
       memorytype: [], color: [], oc: '', inStock: false,
-      fans: [], buswidth: [], interfaceversion: []
+      fans: [], buswidth: [], interfaceversion: [],
+      minPrice: '', maxPrice: ''
     })
   }
 
@@ -128,6 +133,33 @@ const buttonClass = (active: boolean) =>
                 className="text-xs text-gray-300 hover:text-orange-500  " > Limpiar
             </button>
         </div>
+
+      <div className="mb-4">
+        <label className="block text-gray-400 mb-1">Precio (MXN)</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            step={100}
+            min={options.minPrice}
+            max={options.maxPrice}
+            placeholder={options.minPrice.toString()}
+            value={filters.minPrice}
+            onChange={e => update('minPrice', e.target.value)}
+            className="w-full border border-gray-700 rounded px-2 py-1 bg-darkblue-800 text-gray-50 placeholder-gray-500 focus:outline-none focus:border-orange-500"
+          />
+          <span className="text-gray-500">-</span>
+          <input
+            type="number"
+            step={100}
+            min={options.minPrice}
+            max={options.maxPrice}
+            placeholder={options.maxPrice.toString()}
+            value={filters.maxPrice}
+            onChange={e => update('maxPrice', e.target.value)}
+            className="w-full border border-gray-700 rounded px-2 py-1 bg-darkblue-800 text-gray-50 placeholder-gray-500 focus:outline-none focus:border-orange-500"
+          />
+        </div>
+      </div>
 
       <div className="mb-4">
         <label className="block text-gray-400 mb-1">VRAM</label>

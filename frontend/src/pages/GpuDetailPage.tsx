@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import type { Gpu } from '../types'
 import SpecsSidebar from '../components/SpecsSidebar'
 import PricesTable from '../components/PricesTable'
+import PriceHistoryChart from '../components/PriceHistoryChart'
 
 function GpuDetailPage() {
   const { id } = useParams()
@@ -15,7 +16,7 @@ function GpuDetailPage() {
     setLoading(true)
     setError(null)
 
-    fetch(`http://localhost:3000/api/gpus/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/gpus/${id}`)
       .then(res => {
         if (!res.ok) throw new Error(res.status === 404 ? 'Producto no encontrado' : `Error del servidor: ${res.status}`)
         return res.json()
@@ -31,7 +32,7 @@ function GpuDetailPage() {
 
   return (
     
-    <div className="p-8 bg-gray-900 min-h-screen">
+    <div className="p-8 bg-gray-900 min-h-screen overflow-x-hidden">
         <button 
           onClick={() => navigate(-1)}
           className="text-orange-500 hover:text-orange-400 text-sm"
@@ -44,6 +45,7 @@ function GpuDetailPage() {
         <SpecsSidebar gpu={gpu} />
         <PricesTable listings={gpu.listings} />
     </div>
+        <PriceHistoryChart productId={gpu.productid} />
     </div>
   )
 }

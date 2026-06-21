@@ -93,7 +93,8 @@ def save_listing(cursor, conn, listing):
             UpdatedAt = NOW(),
             ImageUrl = EXCLUDED.ImageUrl,
             Currency = EXCLUDED.Currency,
-            ShippingPrice = EXCLUDED.ShippingPrice;
+            ShippingPrice = EXCLUDED.ShippingPrice
+        RETURNING listingid;
         """,
         (
             listing["storelistingid"],
@@ -107,6 +108,16 @@ def save_listing(cursor, conn, listing):
             listing["currency"],
             listing["shippingprice"],
         )
+    )
+
+    listingid = cursor.fetchone()[0]
+
+    cursor.execute(
+        """
+        INSERT INTO pricesnapshot (listingid, currency, price, capturedat, shippingprice)
+        VALUES (%s, %s, %s, NOW(), %s);
+        """,
+        (listingid, listing["currency"], listing["price"], listing["shippingprice"])
     )
     conn.commit()
 

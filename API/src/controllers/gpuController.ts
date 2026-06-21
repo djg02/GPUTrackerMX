@@ -281,7 +281,7 @@ export const getGpuById = async (req: Request, res: Response) => {
 
 export const getGpuFilters = async (req: Request, res: Response) => {
   try {
-    const [brandsResult, manufacturersResult, colorsResult, vramResult, modelResult, fansResult, memoryTypeResult, ocResult, buswidthResult, interfaceVersionResult ] = await Promise.all([
+    const [brandsResult, manufacturersResult, colorsResult, vramResult, modelResult, fansResult, memoryTypeResult, ocResult, buswidthResult, interfaceVersionResult, priceRangeResult] = await Promise.all([
           pool.query(`SELECT DISTINCT brand FROM product WHERE brand IS NOT NULL ORDER BY brand`),
           pool.query(`SELECT DISTINCT manufacturer_normalized FROM product WHERE manufacturer_normalized IS NOT NULL ORDER BY manufacturer_normalized`),
           pool.query(`SELECT DISTINCT color FROM product WHERE color IS NOT NULL ORDER BY color`),
@@ -291,7 +291,17 @@ export const getGpuFilters = async (req: Request, res: Response) => {
           pool.query(`SELECT DISTINCT memorytype FROM product WHERE memorytype IS NOT NULL ORDER BY memorytype`),
           pool.query(`SELECT DISTINCT oc FROM product WHERE oc IS NOT NULL ORDER BY oc`),
           pool.query(`SELECT DISTINCT buswidth FROM product WHERE buswidth IS NOT NULL ORDER BY buswidth`),
-          pool.query(`SELECT DISTINCT interfaceversion FROM product WHERE interfaceversion IS NOT NULL ORDER BY interfaceversion`)
+          pool.query(`SELECT DISTINCT interfaceversion FROM product WHERE interfaceversion IS NOT NULL ORDER BY interfaceversion`),
+          pool.query(`
+            SELECT MIN(price) AS minprice, MAX(price) AS maxprice FROM (
+              SELECT MIN(l.currentprice) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) AS price
+              FROM product p
+              LEFT JOIN product_listing_match m ON m.productid = p.productid
+              LEFT JOIN listing l ON l.listingid = m.listingid
+              GROUP BY p.productid
+            ) AS lowest_prices
+            WHERE price IS NOT NULL
+          `)
         ]);
 
         res.json({
@@ -304,10 +314,51 @@ export const getGpuFilters = async (req: Request, res: Response) => {
           memoryTypes: memoryTypeResult.rows.map((r: any) => r.memorytype),
           ocOptions: ocResult.rows.map((r: any) => r.oc),
           buswidths: buswidthResult.rows.map((r: any) => r.buswidth),
-          interfaceVersions: interfaceVersionResult.rows.map((r: any) => r.interfaceversion)
+          interfaceVersions: interfaceVersionResult.rows.map((r: any) => r.interfaceversion),
+          minPrice: Number(priceRangeResult.rows[0].minprice),
+          maxPrice: Number(priceRangeResult.rows[0].maxprice),
         });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch filters' });
+  }
+};
+
+export const getGpuHistory = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { days } = req.query;
+
+  try {
+    const values: any[] = [id];
+    let dateFilter = '';
+
+    if (days !== undefined) {
+      const daysNum = Number(days);
+      if (isNaN(daysNum) || daysNum < 1) {
+        return res.status(400).json({ error: 'Invalid days parameter. Must be a positive integer.' });
+      }
+      values.push(daysNum);
+      dateFilter = `AND ps.capturedat >= NOW() - ($2 || ' days')::interval`;
+    }
+
+    const result = await pool.query(`
+      SELECT 
+        s.storename,
+        DATE_TRUNC('day', ps.capturedat) AS day,
+        MIN(ps.price) AS price
+      FROM pricesnapshot ps
+      JOIN listing l ON l.listingid = ps.listingid
+      JOIN product_listing_match m ON m.listingid = l.listingid
+      JOIN store s ON s.storeid = l.storeid
+      WHERE m.productid = $1
+      ${dateFilter}
+      GROUP BY s.storename, DATE_TRUNC('day', ps.capturedat)
+      ORDER BY day ASC
+    `, values);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch price history' });
   }
 };

@@ -42,7 +42,8 @@ insert_query = """
         AvailabilityStatus = EXCLUDED.AvailabilityStatus,
         ShippingPrice = EXCLUDED.ShippingPrice,
         RawJson = EXCLUDED.RawJson,
-        SpecJson = EXCLUDED.SpecJson;
+        SpecJson = EXCLUDED.SpecJson
+        RETURNING listingid, currentprice, shippingprice, currency;
 """
 
 
@@ -152,6 +153,13 @@ try:
 
             try:
                 cursor.execute(insert_query, row)
+                listingid, currentprice, shippingprice, currency = cursor.fetchone()
+
+                cursor.execute("""
+                    INSERT INTO pricesnapshot (listingid, currency, price, capturedat, shippingprice)
+                    VALUES (%s, %s, %s, NOW(), %s);
+                """, (listingid, currency, currentprice, shippingprice))
+
                 conn.commit()
                 print(f"[green]Saved {seo_part_number}[/green]")
             except Exception as db_err:

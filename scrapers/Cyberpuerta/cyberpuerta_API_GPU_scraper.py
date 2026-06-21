@@ -42,7 +42,13 @@ insert_query = """
         AvailabilityStatus = EXCLUDED.AvailabilityStatus,
         ShippingPrice = EXCLUDED.ShippingPrice,
         RawJson = EXCLUDED.RawJson,
-        SpecJson = EXCLUDED.SpecJson;
+        SpecJson = EXCLUDED.SpecJson
+    RETURNING listingid, currentprice, shippingprice, currency;
+"""
+
+snapshot_query = """
+    INSERT INTO pricesnapshot (listingid, currency, price, capturedat, shippingprice)
+    VALUES (%s, %s, %s, NOW(), %s);
 """
 
 
@@ -137,7 +143,10 @@ try:
                     ))
 
                 try:
-                    cursor.executemany(insert_query, batch_data)
+                    for row in batch_data:
+                        cursor.execute(insert_query, row)
+                        listingid, currentprice, shippingprice, currency = cursor.fetchone()
+                        cursor.execute(snapshot_query, (listingid, currency, currentprice, shippingprice))
                     conn.commit()
                 except Exception as db_err:
                     conn.rollback()

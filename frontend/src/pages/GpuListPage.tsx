@@ -20,6 +20,8 @@ function filtersFromParams(params: URLSearchParams): ActiveFilters {
         fans: params.getAll('fans'),
         buswidth: params.getAll('buswidth'),
         interfaceversion: params.getAll('interfaceversion'),
+        minPrice: params.get('minPrice') || '',
+        maxPrice: params.get('maxPrice') || '',
     }
 }
 
@@ -71,6 +73,8 @@ function GpuListPage() {
         filters.fans.forEach(v => params.append('fans', v))
         filters.buswidth.forEach(v => params.append('buswidth', v))
         filters.interfaceversion.forEach(v => params.append('interfaceversion', v))
+        if (filters.minPrice) params.set('minPrice', filters.minPrice)
+        if (filters.maxPrice) params.set('maxPrice', filters.maxPrice)
 
         setLoading(true)
         setError(null)
@@ -145,7 +149,7 @@ function GpuListPage() {
                 setSearchParams(prev => {
                 const next = new URLSearchParams(prev)
                 // Clear all filter-related keys first
-                ;['brand', 'manufacturer', 'model', 'vram', 'memorytype', 'color', 'oc', 'inStock', 'fans', 'buswidth', 'interfaceversion'].forEach(key => next.delete(key))
+                ;['brand', 'manufacturer', 'model', 'vram', 'memorytype', 'color', 'oc', 'inStock', 'fans', 'buswidth', 'interfaceversion', 'minPrice', 'maxPrice'].forEach(key => next.delete(key))
                 
                 // Re-add the new values
                 newFilters.brand.forEach(v => next.append('brand', v))
@@ -159,6 +163,8 @@ function GpuListPage() {
                 newFilters.fans.forEach(v => next.append('fans', v))
                 newFilters.buswidth.forEach(v => next.append('buswidth', v))
                 newFilters.interfaceversion.forEach(v => next.append('interfaceversion', v))
+                if (newFilters.minPrice) next.set('minPrice', newFilters.minPrice)
+                if (newFilters.maxPrice) next.set('maxPrice', newFilters.maxPrice)
                 
                 next.set('page', '1')
                 return next
