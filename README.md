@@ -12,7 +12,7 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 * Parses and normalizes hardware attributes into structured fields
 * Matches products across stores using specification-based and SKU-based matching
 * Exposes product and listing data through a REST API
-* Frontend dashboard for searching, filtering, and comparing GPU prices
+* Frontend dashboard for searching, filtering, and comparing GPU prices with historical price analytics
 
 ## Architecture
 
@@ -20,9 +20,11 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 
 ## Supported Stores
 
+* MercadoLibre
 * DDTech
 * Cyberpuerta
 * Digitalife
+* PCEL
 * Additional retailers planned.
 
 ## API Documentation
@@ -52,6 +54,7 @@ Each listing stores:
 * Tailwind CSS
 * BeautifulSoup
 * FlareSolverr
+* Camoufox
 * httpx
 * psycopg
 
@@ -63,7 +66,6 @@ Each listing stores:
 
 ## Planned Features
 
-* Historical price analytics
 * Automated scheduled scraping
 * CPU and other hardware category expansion
 * Public web interface
