@@ -595,6 +595,7 @@ cursor.execute("""
     SELECT listingid, storetitle
     FROM listing
     WHERE storeid = 1
+    AND (parsed = false OR parsed IS NULL)
     ORDER BY listingid
 """)
 
