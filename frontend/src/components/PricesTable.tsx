@@ -4,6 +4,7 @@ import cyberpuertaLogo from '../assets/store_logos/cyberpuerta.png'
 import digitalifeLogo from '../assets/store_logos/digitalife.png'
 import pcelLogo from '../assets/store_logos/pcel.png'
 import MLLogo from '../assets/store_logos/mercadolibre.png'
+import zegucomLogo from '../assets/store_logos/zegucom.png'
 
 const storeLogos: Record<string, string> = {
   'DDTech': ddtechLogo,
@@ -11,6 +12,7 @@ const storeLogos: Record<string, string> = {
   'digitalife': digitalifeLogo,
   'PCEL' : pcelLogo,
   'MercadoLibre' : MLLogo,
+  'Zegucom' : zegucomLogo,
 }
 
 function timeAgo(isoDate: string): string {
@@ -68,7 +70,11 @@ function PricesTable({ listings }: PricesTableProps) {
                   <div className="text-xs text-gray-400">{timeAgo(listing.currentpriceupdated)}</div>
                 </td>
                 <td className="p-2 text-right text-gray-400">
-                  {listing.shipping !== null ? `$${listing.shipping.toLocaleString()} MXN` : 'Calculado en Checkout'}
+                  {listing.shipping === null
+                    ? 'Calculado en Checkout'
+                    : listing.shipping === 0
+                      ? 'Gratis'
+                      : `$${listing.shipping.toLocaleString()} MXN`}
                 </td>
                 <td className="p-2 text-right font-bold text-orange-500">
                   {listing.shipping !== null
@@ -115,7 +121,12 @@ function PricesTable({ listings }: PricesTableProps) {
               <div className="flex justify-between">
                 <span className="text-gray-500">Envío</span>
                 <span className="text-gray-400">
-                  {listing.shipping !== null ? `$${listing.shipping.toLocaleString()}` : 'En checkout'}</span>
+                  {listing.shipping !== null
+                    ? listing.shipping === 0
+                      ? 'Gratis'
+                      : `$${listing.shipping.toLocaleString()}`
+                    : 'En checkout'}
+                </span>
               </div>
             </div>
 

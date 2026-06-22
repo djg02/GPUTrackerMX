@@ -25,6 +25,7 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 * Cyberpuerta
 * Digitalife
 * PCEL
+* Zegucom
 * Additional retailers planned.
 
 ## API Documentation
