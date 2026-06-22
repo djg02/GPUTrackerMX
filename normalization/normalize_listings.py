@@ -24,22 +24,20 @@ def get_rows():
         """)
     return cursor.fetchall()
 
+def normalize_suffix(m):
+    number = m.group(1)
+    suffix = m.group(2).upper()
+    if suffix == "TI":
+        suffix = "Ti"
+    return f"RTX {number} {suffix}"
 
 def normalize_model(model):
     if not model:
         return None
-    
+
     model = unicodedata.normalize("NFKC", model)
-
-    # Remove soft hyphens and other invisible formatting chars
-    model = model.replace("\u00AD", "")  # soft hyphen
-
-    # Remove all Unicode format characters (Cf)
-    model = "".join(
-        c for c in model
-        if unicodedata.category(c) != "Cf"
-    )
-
+    model = model.replace("\u00AD", "")
+    model = "".join(c for c in model if unicodedata.category(c) != "Cf")
     model = model.strip()
     model = re.sub(r"\s+", " ", model)
 
@@ -48,27 +46,30 @@ def normalize_model(model):
 
     # RX7700XT -> RX 7700 XT
     model = re.sub(
-        r"RX\s*(\d{4})(XTX|XT|GRE)\b",
+        r"RX\s*(\d{4})\s*(XTX|XT|GRE)\b",
         r"RX \1 \2",
         model,
         flags=re.I
     )
 
-    # RTX4070Ti -> RTX 4070 Ti
+    # RTX4070Ti / RTX 4070 TI / RTX 4070 Super -> RTX 4070 Ti / RTX 4070 SUPER
     model = re.sub(
-        r"RTX\s*(\d{4})(TI|SUPER)\b",
-        r"RTX \1 \2",
+        r"RTX\s*(\d{4})\s*(TI|SUPER)\b",
+        normalize_suffix,
         model,
         flags=re.I
     )
 
     model = re.sub(r"\s+", " ", model)
 
+    # Standalone cleanup for cases that already had spaces
+    model = re.sub(r'\bTI\b', 'Ti', model)
+    model = re.sub(r'\bSuper\b', 'SUPER', model)
+
     model_upper = model.upper()
 
     if model_upper.startswith("RX "):
         model = f"Radeon {model}"
-
     elif (
         model_upper.startswith("RTX ")
         or model_upper.startswith("GTX ")
@@ -187,12 +188,6 @@ def normalize_variant(manufacturer, variant):
     variant = re.sub(r"^Tarjeta Video\s+", "", variant, flags=re.I)
     variant = re.sub(r"^Computer Corp\s+", "", variant, flags=re.I)
 
-    if (
-        len(variant) > 50
-        or re.search(r"\d{4,}", variant)
-        or "GARANTIA" in variant.upper()
-    ):
-        return None
 
     manufacturer = normalize_manufacturer(manufacturer)
 
@@ -215,23 +210,11 @@ def normalize_variant(manufacturer, variant):
             "WINDFORCE MAX": "Windforce Max",
             "WINDFORCE SFF": "Windforce SFF",
             "WINDFORCE V2": "Windforce V2",
-            "AORUS MASTER": "AORUS Master",
-            "AORUS MASTER ICE": "AORUS Master Ice",
-            "AORUS MASTER LHR": "Aorus Master LHR",
-            "AORUS XTREME LHR": "Aorus Xtreme LHR",
             "XTREME WATERFORCE": "Xtreme Waterforce",
             "LOW PROFILE": "Low Profile",
-            "AORUS ELITE": "AORUS Elite",
             "EAGLE SFF": "Eagle SFF",
             "ICE": "Ice",
             "WINDFORCE 2X V2": "Windforce 2X V2",
-            "AORUS XTREME": "AORUS Xtreme",
-            "AORUS WATERFORCE": "AORUS Waterforce",
-            "AORUS WATERFORCE WB": "AORUS Waterforce WB",
-            "AORUS XTREME WATERFORCE": "AORUS Xtreme Waterforce",
-            "MASTER": "AORUS Master",
-            "MASTER ICE": "AORUS Master Ice",
-            "XTREME": "AORUS Xtreme",
         },
 
         "ASUS": {
@@ -265,6 +248,8 @@ def normalize_variant(manufacturer, variant):
             "GAMING X": "Gaming X",
             "SHADOW 2X": "Shadow 2X",
             "SHADOW 3X": "Shadow 3X",
+            "INSPIRE 3X": "Inspire 2X",
+            "INSPIRE 2X PLUS": "Inspire 3X Plus",
             "INSPIRE 3X": "Inspire 3X",
             "INSPIRE 3X PLUS": "Inspire 3X Plus",
             "LIGHTNING Z": "Lightning Z",
@@ -410,9 +395,34 @@ def normalize_variant(manufacturer, variant):
             "GAMEROCK": "GameRock",
             "DUAL": "Dual",
         },
+
+        "AORUS": {
+            "AORUS MASTER ICE": "Master Ice",
+            "AORUS MASTER LHR": "Master LHR",
+            "AORUS XTREME WATERFORCE WB": "Xtreme Waterforce WB",
+            "AORUS XTREME WATERFORCE": "Xtreme Waterforce",
+            "AORUS XTREME LHR": "Xtreme LHR",
+            "AORUS XTREME": "Xtreme",
+            "AORUS WATERFORCE WB": "Waterforce WB",
+            "AORUS WATERFORCE": "Waterforce",
+            "AORUS MASTER": "Master",
+            "AORUS ELITE": "Elite",
+            "MASTER ICE": "Master Ice",
+            "MASTER LHR": "Master LHR",
+            "XTREME WATERFORCE WB": "Xtreme Waterforce WB",
+            "XTREME WATERFORCE": "Xtreme Waterforce",
+            "XTREME LHR": "Xtreme LHR",
+            "XTREME": "Xtreme",
+            "MASTER": "Master",
+            "ELITE": "Elite",
+            "STEALTH ICE": "Stealth Ice",
+        },
     }
 
     key = variant.upper()
+    # Strip leading AORUS prefix so "AORUS MASTER" and "MASTER" both match
+    if manufacturer == "AORUS":
+        key = re.sub(r'^AORUS\s+', '', key)
 
     manufacturer_map = mappings.get(manufacturer)
 
@@ -424,6 +434,13 @@ def normalize_variant(manufacturer, variant):
         ):
             if pattern in key:
                 return normalized
+            
+    # only reject after normalization failed
+    if (
+        len(variant) > 50
+        or "GARANTIA" in variant.upper()
+    ):
+        return None
 
     return variant
 
@@ -435,6 +452,7 @@ def normalize_manufacturer(manufacturer):
 
     replacements = {
         "POWER COLOR": "POWERCOLOR",
+        "AORUS": "AORUS",
     }
 
     return replacements.get(manufacturer, manufacturer)    
@@ -468,7 +486,13 @@ def normalize_listing_rows():
     for row in rows:
         try:
             color_normalized = normalize_color(row["color"], row["title"])
-            manufacturer_normalized = normalize_manufacturer(row["manufacturer"])
+            manufacturer = row["manufacturer"]
+            title = row["title"] or ""
+
+            if "AORUS" in title.upper():
+                manufacturer = "AORUS"
+
+            manufacturer_normalized = normalize_manufacturer(manufacturer)
 
             model_normalized = normalize_model(row["gpumodel"])
 

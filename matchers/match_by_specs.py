@@ -27,12 +27,11 @@ def get_unmatched_listings():
     return cursor.fetchall()
 
 
-def find_products(manufacturer_normalized, gpumodel_normalized, vramgb, memorytype, coolervariant_normalized, oc, color_normalized ):
+def find_products(manufacturer_normalized, gpumodel_normalized, vramgb, coolervariant_normalized, oc, color_normalized ):
     params = (
         manufacturer_normalized,
         gpumodel_normalized,
         vramgb,
-        memorytype,
         coolervariant_normalized,
         oc,
     )
@@ -45,7 +44,6 @@ def find_products(manufacturer_normalized, gpumodel_normalized, vramgb, memoryty
             AND manufacturer_normalized = %s
             AND model_normalized = %s
             AND COALESCE(vramgb, -1) = COALESCE(%s, -1)
-            AND COALESCE(memorytype, '') = COALESCE(%s, '')
             AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
             AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
             AND color = %s
@@ -58,7 +56,6 @@ def find_products(manufacturer_normalized, gpumodel_normalized, vramgb, memoryty
             AND manufacturer_normalized = %s
             AND model_normalized = %s
             AND COALESCE(vramgb, -1) = COALESCE(%s, -1)
-            AND COALESCE(memorytype, '') = COALESCE(%s, '')
             AND COALESCE(coolervariant_normalized, '') = COALESCE(%s, '')
             AND COALESCE(oc, FALSE) = COALESCE(%s, FALSE)
             AND color IS NULL
@@ -78,7 +75,6 @@ def match_by_specs(rows):
                 row["manufacturer_normalized"],
                 row["gpumodel_normalized"],
                 row["vramgb"],
-                row["memorytype"],
                 row["coolervariant_normalized"],
                 row["oc"],
                 row["color_normalized"]
