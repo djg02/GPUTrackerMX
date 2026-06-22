@@ -3,12 +3,14 @@ import ddtechLogo from '../assets/store_logos/ddtech.png'
 import cyberpuertaLogo from '../assets/store_logos/cyberpuerta.png'
 import digitalifeLogo from '../assets/store_logos/digitalife.png'
 import pcelLogo from '../assets/store_logos/pcel.png'
+import MLLogo from '../assets/store_logos/mercadolibre.png'
 
 const storeLogos: Record<string, string> = {
   'DDTech': ddtechLogo,
   'Cyberpuerta': cyberpuertaLogo,
   'digitalife': digitalifeLogo,
   'PCEL' : pcelLogo,
+  'MercadoLibre' : MLLogo,
 }
 
 function timeAgo(isoDate: string): string {

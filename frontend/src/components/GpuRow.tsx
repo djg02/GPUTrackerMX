@@ -4,6 +4,7 @@ import ddtechLogo from '../assets/store_logos/ddtech.png'
 import cyberpuertaLogo from '../assets/store_logos/cyberpuerta.png'
 import digitalifeLogo from '../assets/store_logos/digitalife.png'
 import pcellogo from '../assets/store_logos/pcel.png'
+import MLLogo from '../assets/store_logos/mercadolibre.png'
 
 interface GpuRowProps {
   gpu: Gpu
@@ -14,6 +15,7 @@ const storeLogos: Record<string, string> = {
   'Cyberpuerta': cyberpuertaLogo,
   'digitalife': digitalifeLogo,
   'PCEL' : pcellogo,
+  'MercadoLibre' : MLLogo,
 }
 
 const getInStockStores = (listings: Listing[]) => [
