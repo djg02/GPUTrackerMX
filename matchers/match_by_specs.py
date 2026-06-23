@@ -2,6 +2,7 @@ from rich import print
 from dotenv import load_dotenv
 import os
 import psycopg
+import re
 load_dotenv()
 
 conn = psycopg.connect(
@@ -13,6 +14,17 @@ conn = psycopg.connect(
 )
 conn.row_factory = psycopg.rows.dict_row
 cursor = conn.cursor()
+
+def normalize_sku(sku: str) -> str:
+    if not sku:
+        return None
+    sku = sku.upper().strip()
+    sku = re.sub(r'\s+', '', sku)
+    sku = re.sub(r'[_/\.\s]+', '-', sku)
+    sku = re.sub(r'[^A-Z0-9\-]', '', sku)
+    sku = re.sub(r'-+', '-', sku)
+    sku = re.sub(r'-ROW$', '', sku)
+    return sku.strip('-').lower()
 
 
 def get_unmatched_listings():
@@ -63,6 +75,19 @@ def find_products(manufacturer_normalized, gpumodel_normalized, vramgb, coolerva
 
     return cursor.fetchall()
 
+def register_sku(product_id, sku):
+    if not sku:
+        return
+    try:
+        normalized_sku = normalize_sku(sku)
+        cursor.execute("""
+            INSERT INTO product_sku (productid, sku, normalizedsku, createdat)
+            VALUES (%s, %s, %s, NOW())
+            ON CONFLICT (normalizedsku) DO NOTHING
+        """, (product_id, sku, normalized_sku))
+    except Exception as e:
+        print(f"[yellow]SKU registration failed for {sku}:[/yellow] {e}")
+
 
 def match_by_specs(rows):
     matched = 0
@@ -96,6 +121,8 @@ def match_by_specs(rows):
                     SET product_matched = TRUE
                     WHERE listingid = %s
                 """, (row["listingid"],))
+
+                register_sku(product_id, row.get("sku"))
 
                 conn.commit()
 
