@@ -26,6 +26,7 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 * Digitalife
 * PCEL
 * Zegucom
+* Intercompras
 * Additional retailers planned.
 
 ## API Documentation
@@ -61,13 +62,11 @@ Each listing stores:
 
 ## Current Focus
 
-* Update frontend dashboard with filters and detail pages
+* Launching and hosting the public web interface
 * Expanding retailer coverage
-* Preparing historical price tracking infrastructure
 
 ## Planned Features
 
 * Automated scheduled scraping
 * CPU and other hardware category expansion
-* Public web interface
 
