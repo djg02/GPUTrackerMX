@@ -71,7 +71,7 @@ function GpuRow({ gpu }: GpuRowProps) {
         </td>
         <td className="p-2">
           {inStockStores.length === 0 
-            ? <span className="text-xs text-red-500 font-bold">Sin stock</span>
+            ? <span className="block text-center text-xs text-red-500 font-bold">Sin stock</span>
             : (
               <div className="flex flex-wrap justify-center gap-1 max-w-[80px] mx-auto ">
                 {inStockStores.map(l => storeLogos[l.storename] && (
