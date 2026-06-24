@@ -134,7 +134,7 @@ try:
                         product.get("link"),
                         product.get("availability"),
                         product.get("price"),
-                        product.get("picture"),
+                        product.get("picture", "").replace("/img/product/S/", "/img/product/L/"),
                         product.get("stock"),
                         json.dumps(product, default=str),
                         "MXN",

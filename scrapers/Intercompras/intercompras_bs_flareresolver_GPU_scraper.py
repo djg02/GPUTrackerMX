@@ -133,7 +133,7 @@ def extract_listings(html):
             for img in imgs:
                 src = img.get("src", "")
                 if "logofabricante" not in src:
-                    imageurl = src
+                    imageurl = src.split("?")[0]
                     break
 
             listings.append({
