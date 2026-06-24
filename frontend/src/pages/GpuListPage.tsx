@@ -132,16 +132,22 @@ function GpuListPage() {
             {/* Filter panel: always visible on desktop, overlay on mobile when open */}
             <div className={`
                 ${isFilterOpen ? 'fixed inset-0 z-50 bg-gray-900 p-6 overflow-y-auto' : 'hidden'}
-                md:block md:static md:bg-transparent md:p-0
+                md:block md:static md:bg-transparent md:p-0 pt-[50px]
             `}>
-                {isFilterOpen && (
+            {isFilterOpen && (
+            <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-gray-900 border-b border-gray-800 shadow-md">
+                <div className="flex items-center justify-between px-4 py-3">
+                <h2 className="text-white font-medium">Filtros</h2>
+
                 <button
                     onClick={() => setIsFilterOpen(false)}
-                    className="md:hidden mb-4 text-orange-500"
+                    className="text-orange-500 text-sm font-medium"
                 >
                     ✕ Cerrar
                 </button>
-                )}
+                </div>
+            </div>
+            )}
 
         <FilterPanel
             filters={filters}

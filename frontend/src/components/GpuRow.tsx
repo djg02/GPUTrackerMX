@@ -71,7 +71,7 @@ function GpuRow({ gpu }: GpuRowProps) {
         </td>
         <td className="p-2">
           {inStockStores.length === 0 
-            ? <span className="block text-center text-xs text-red-500 font-bold">Sin stock</span>
+            ? <span className="block text-center text-xs text-red-500 font-bold">Agotado</span>
             : (
               <div className="flex flex-wrap justify-center gap-1 max-w-[80px] mx-auto ">
                 {inStockStores.map(l => storeLogos[l.storename] && (
@@ -134,10 +134,11 @@ function GpuRow({ gpu }: GpuRowProps) {
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-700">
           <div className="flex items-center gap-1">
           {inStockStores.length === 0
-            ? <span className="text-xs text-red-500 font-bold">Sin stock</span>
+            ? <span className="text-xs text-red-500 font-bold">Agotado</span>
             : (
               <>
-                <span className="text-xs text-green-500 font-bold">Stock: </span>
+                <span className="text-xs text-green-500 font-bold ">Stock: </span>
+                <div className="flex flex-wrap justify-center gap-1 max-w-[80px] mx-auto " >
                 {inStockStores.map(l => storeLogos[l.storename] && (
                   <img
                     key={l.link}
@@ -146,13 +147,13 @@ function GpuRow({ gpu }: GpuRowProps) {
                     title={l.storename}
                     className="w-6 h-6 object-contain rounded-lg"
                   />
-                ))}
+                ))}</div>
               </>
             )
           }
           </div>
-          <span className="font-bold text-lg text-orange-500">
-            {gpu.lowestPrice ? `$${gpu.lowestPrice.toLocaleString()} MXN` : 'N/A'}
+          <span className="font-bold text-lg text-orange-500 ">
+            {gpu.lowestPrice ? `$${Math.floor(gpu.lowestPrice).toLocaleString()} MXN` : 'N/A'}
           </span>
         </div>
       </div>

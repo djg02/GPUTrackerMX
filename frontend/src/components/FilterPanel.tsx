@@ -56,8 +56,8 @@ const buttonClass = (active: boolean) =>
 
   return (
     <div className="w-full md:w-64 md:shrink-0">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-bold text-gray-200">Filtros</h2>
+      <div className="flex items-center justify-between mb-3"></div>
+      <div className="mb-4">
         <button onClick={reset} className="px-3 py-1 text-xs font-medium text-red-400 bg-darkblue-800 border border-gray-700 rounded-md hover:border-orange-600 ">
           Reiniciar Filtros
         </button>
