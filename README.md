@@ -75,7 +75,7 @@ Each listing stores:
 * psycopg
 
 ## Current Focus
-* Automated scheduled scraping
+
 * Expanding retailer coverage
 
 ## Planned Features

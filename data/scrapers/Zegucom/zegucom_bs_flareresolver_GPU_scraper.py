@@ -214,6 +214,9 @@ def run():
             print(f"[cyan]Products found:[/cyan] {len(products)}")
 
             for p in products:
+                if not p.get("storelistingid"):
+                    print(f"[yellow]Skipped (no storelistingid):[/yellow] {p['title']}")
+                    continue
                 try:
                     save_listing(cursor, conn, p)
                     total += 1
