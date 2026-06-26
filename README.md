@@ -1,6 +1,9 @@
-# GPU Price Tracker
+# Mexican GPU Price Tracker 
 
-Aggregates and normalizes GPU listings from Mexican PC hardware retailers for price tracking, stock monitoring, and cross-store comparison.
+[GPUTracker.mx](https://gputracker.mx)
+
+A full-stack GPU price tracking and comparison system with automated scraping and historical analytics.
+
 
 ## Features
 
@@ -27,7 +30,17 @@ Aggregates and normalizes GPU listings from Mexican PC hardware retailers for pr
 * PCEL
 * Zegucom
 * Intercompras
-* Additional retailers planned.
+* Additional retailers planned
+
+## Deployment
+
+Runs behind Cloudflare Tunnel with Nginx as the only public entry point.
+
+Architecture:
+
+Internet → Cloudflare → Tunnel → Nginx → API → PostgreSQL
+
+PostgreSQL is fully internal and not exposed to the internet.
 
 ## API Documentation
 
@@ -54,6 +67,7 @@ Each listing stores:
 * React
 * Vite
 * Tailwind CSS
+* Docker
 * BeautifulSoup
 * FlareSolverr
 * Camoufox
@@ -61,12 +75,10 @@ Each listing stores:
 * psycopg
 
 ## Current Focus
-
-* Launching and hosting the public web interface
+* Automated scheduled scraping
 * Expanding retailer coverage
 
 ## Planned Features
 
-* Automated scheduled scraping
 * CPU and other hardware category expansion
 

@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 
 load_dotenv()
 
-FLARESOLVERR_URL = "http://localhost:8191/v1"
+FLARESOLVERR_URL = "http://flaresolverr:8191/v1"
 SESSION_ID = "ddtech_session"
 BASE_URL = "https://ddtech.mx"
 

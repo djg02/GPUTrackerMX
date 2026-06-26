@@ -18,7 +18,8 @@ const storeLogos: Record<string, string> = {
 }
 
 function timeAgo(isoDate: string): string {
-  const diffMs = Date.now() - new Date(isoDate).getTime()
+  const date = new Date(isoDate.endsWith('Z') ? isoDate : isoDate + 'Z')
+  const diffMs = Date.now() - date.getTime()
   const diffMinutes = Math.floor(diffMs / 60000)
   const diffHours = Math.floor(diffMinutes / 60)
   const diffDays = Math.floor(diffHours / 24)
@@ -69,7 +70,7 @@ function PricesTable({ listings }: PricesTableProps) {
                 </td>
                 <td className="p-2 text-right">
                   <div className="text-gray-200">${listing.price.toLocaleString()}</div>
-                  <div className="text-xs text-gray-400">{timeAgo(listing.currentpriceupdated)}</div>
+                  <div className="text-xs text-gray-400">{timeAgo(listing.lastseen)}</div>
                 </td>
                 <td className="p-2 text-right text-gray-400">
                   {listing.shipping === null
@@ -118,7 +119,7 @@ function PricesTable({ listings }: PricesTableProps) {
               <div className="flex justify-between">
                 <span className="text-gray-500">Precio</span>
                 <span className="text-gray-200">
-                  ${listing.price.toLocaleString()} <span className="text-xs text-gray-400">({timeAgo(listing.currentpriceupdated)})</span></span>
+                  ${listing.price.toLocaleString()} <span className="text-xs text-gray-400">({timeAgo(listing.lastseen)})</span></span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Envío</span>

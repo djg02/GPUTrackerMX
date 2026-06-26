@@ -178,6 +178,7 @@ CREATE TABLE public.listing_parsed (
 	gpumodel_normalized text NULL,
 	coolervariant_normalized text NULL,
 	manufacturer_normalized text NULL,
+	color_normalized varchar(50) NULL,
 	CONSTRAINT listing_parsed_listingid_unique UNIQUE (listingid),
 	CONSTRAINT listing_parsed_pkey PRIMARY KEY (listingparsedid),
 	CONSTRAINT fk_listing FOREIGN KEY (listingid) REFERENCES public.listing(listingid),

@@ -27,7 +27,7 @@ def is_actual_gpu(title):
         return False
     return True
 
-FLARESOLVERR_URL = "http://localhost:8191/v1"
+FLARESOLVERR_URL = "http://flaresolverr:8191/v1"
 BASE_LIST_URL = "https://www.pcel.com/hardware/tarjetas-de-video?sucursal=0&show_oos=1&page={page}"
 STORE_ID = 4  # PCEL
 

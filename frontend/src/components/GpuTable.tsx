@@ -1,5 +1,5 @@
 import GpuRow from './GpuRow'
-import type { Listing, Gpu } from '../types'
+import type { Gpu } from '../types'
 
 interface GpuTableProps {
   gpus: Gpu[]

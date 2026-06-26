@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate} from 'react-router-dom'
 import type { Gpu } from '../types'
 import SpecsSidebar from '../components/SpecsSidebar'
 import PricesTable from '../components/PricesTable'
@@ -16,7 +16,7 @@ function GpuDetailPage() {
     setLoading(true)
     setError(null)
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/gpus/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL}/gpus/${id}`)
       .then(res => {
         if (!res.ok) throw new Error(res.status === 404 ? 'Producto no encontrado' : `Error del servidor: ${res.status}`)
         return res.json()

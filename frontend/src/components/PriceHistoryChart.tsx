@@ -33,7 +33,7 @@ function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
   useEffect(() => {
     setLoading(true)
     const params = days ? `?days=${days}` : ''
-    fetch(`${import.meta.env.VITE_API_URL}/api/gpus/${productId}/history${params}`)
+    fetch(`${import.meta.env.VITE_API_URL}/gpus/${productId}/history${params}`)
       .then(res => res.json())
       .then(json => setRawData(json))
       .finally(() => setLoading(false))

@@ -10,7 +10,7 @@ import time
 
 load_dotenv()
 
-FLARESOLVERR_URL = "http://localhost:8191/v1"
+FLARESOLVERR_URL = "http://flaresolverr:8191/v1"
 BASE_URL = "https://www.zegucom.com.mx/Subcategorias/tarjetas-de-video-pci-exp/PCI/3"
 JOIN_URL = "https://www.zegucom.com.mx/"
 STORE_ID = 6

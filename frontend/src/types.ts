@@ -5,6 +5,7 @@ export interface Listing {
   link: string
   imageurl: string
   availabilitystatus: string
+  shipping: number | null
   lastseen: string
   currentpriceupdated: string
 }
@@ -43,7 +44,7 @@ export interface FilterOptions {
   brands: string[]
   manufacturers: string[]
   colors: string[]
-  vramOptions: number[]
+  vramOptions: string[]
   models: string[]
   fans: number[]
   memoryTypes: string[]

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams} from 'react-router-dom'
 import type {GpuResponse, ActiveFilters } from '../types'
 import Pagination from '../components/Pagination'
 import GpuTable from '../components/GpuTable'
@@ -79,7 +79,7 @@ function GpuListPage() {
         setLoading(true)
         setError(null)
 
-        fetch(`${import.meta.env.VITE_API_URL}/api/gpus?${params.toString()}`)
+        fetch(`${import.meta.env.VITE_API_URL}/gpus?${params.toString()}`)
         .then(res => {
             if (!res.ok) throw new Error(`Error del servidor: ${res.status}`)
             return res.json()

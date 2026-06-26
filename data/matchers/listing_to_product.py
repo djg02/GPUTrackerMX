@@ -15,6 +15,17 @@ conn = psycopg.connect(
 conn.row_factory = psycopg.rows.dict_row
 cursor = conn.cursor()
 
+def build_canonical_name(manufacturer, chipset_brand, gpumodel, coolervariant, oc, vramgb, memorytype, color):
+    parts = [manufacturer, chipset_brand, gpumodel, coolervariant]
+    if oc:
+        parts.append("OC")
+    if vramgb is not None:
+        parts.append(f"{vramgb}GB")
+    if memorytype is not None:
+        parts.append(memorytype)
+    if color is not None:
+        parts.append(color)
+    return " ".join(str(x).strip() for x in parts if x is not None)
 
 def normalize_sku(sku: str) -> str:
     if not sku:
@@ -39,9 +50,10 @@ def is_junk_sku(sku):
 
 def get_eligible_listings():
     cursor.execute("""
-        SELECT lp.*
+        SELECT lp.*, s.storename
         FROM listing_parsed lp
         JOIN listing l ON l.listingid = lp.listingid
+        JOIN store s ON s.storeid = l.storeid
         WHERE lp.chipset_brand IS NOT NULL
         AND lp.vramgb IS NOT NULL
         AND lp.memorytype IS NOT NULL
@@ -50,10 +62,10 @@ def get_eligible_listings():
         AND lp.sku IS NOT NULL
         AND trim(lp.sku) <> ''
         AND lp.product_matched = FALSE
+        AND lp.product_normalized = TRUE
         AND lp.gpumodel_normalized IS NOT NULL
         AND lp.coolervariant_normalized IS NOT NULL
         AND lp.manufacturer_normalized IS NOT NULL
-        AND l.storeid = 1
         ORDER BY lp.manufacturer_normalized, lp.gpumodel_normalized
     """)
     return cursor.fetchall()
@@ -79,22 +91,36 @@ def find_existing_product(row):
 
 
 def create_product(row):
+    canonicalname = build_canonical_name(
+        row["manufacturer_normalized"],
+        row["chipset_brand"],
+        row["gpumodel_normalized"],
+        row["coolervariant_normalized"],
+        row["oc"],
+        row["vramgb"],
+        row["memorytype"],
+        row["color_normalized"]
+)
     cursor.execute("""
         INSERT INTO product (
-            producttype, manufacturer, manufacturer_normalized,
+            producttype, canonicalname, brand,
+            manufacturer, manufacturer_normalized,
             model, model_normalized,
             coolervariant, coolervariant_normalized,
             vramgb, memorytype, buswidth, interfaceversion,
-            oc, source, createdat
+            oc, color, source, createdat
         ) VALUES (
             'GPU', %s, %s,
             %s, %s,
             %s, %s,
+            %s, %s,
             %s, %s, %s, %s,
-            %s, 'ddtech', NOW()
+            %s, %s, %s, NOW()
         )
         RETURNING productid
     """, (
+        canonicalname,
+        row["chipset_brand"],
         row["manufacturer"],
         row["manufacturer_normalized"],
         row["gpumodel"],
@@ -106,6 +132,8 @@ def create_product(row):
         row["buswidth"],
         row["interfaceversion"],
         row["oc"],
+        row["color_normalized"],
+        row["storename"]
     ))
     return cursor.fetchone()["productid"]
 

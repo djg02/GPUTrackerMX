@@ -7,3 +7,13 @@ venv/
 assets/tracker_file_flowchart.drawio
 node_modules/
 dist/
+
+.env
+API/.env
+frontend/.env
+
+backup.sql
+backups/
+
+frontend/dist
+logs/

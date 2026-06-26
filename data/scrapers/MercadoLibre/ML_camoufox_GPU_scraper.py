@@ -6,6 +6,7 @@ import psycopg
 import os
 import re
 import time
+import random
 
 load_dotenv()
 
@@ -138,7 +139,7 @@ def run():
     total_saved = 0
     offset = 0
 
-    with Camoufox(headless=False) as browser:
+    with Camoufox(headless=True) as browser:
         page = browser.new_page()
 
         while True:
@@ -148,8 +149,8 @@ def run():
                 url = BASE_URL.replace("_NoIndex_True", f"_Desde_{offset + 1}_NoIndex_True")
 
             print(f"[blue]Fetching:[/blue] {url}")
-            page.goto(url)
-            page.wait_for_timeout(5000)
+            page.goto(url, timeout=60000)
+            page.wait_for_timeout(random.randint(5000, 10000))
 
             html = page.content()
             listings = extract_listings(html)

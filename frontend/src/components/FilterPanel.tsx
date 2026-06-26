@@ -11,7 +11,7 @@ function FilterPanel({ filters, onChange }: FilterPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false)
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/gpus/filters`)
+    fetch(`${import.meta.env.VITE_API_URL}/gpus/filters`)
       .then(res => res.json())
       .then(json => setOptions(json))
   }, [])
