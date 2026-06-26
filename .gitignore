@@ -17,3 +17,5 @@ backups/
 
 frontend/dist
 logs/
+
+cloudflared/*.json

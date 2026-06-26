@@ -1,0 +1,6 @@
+tunnel: 33f68324-6674-4c00-839c-ddf2ed512216
+credentials-file: /etc/cloudflared/33f68324-6674-4c00-839c-ddf2ed512216.json
+ingress:
+  - hostname: gputracker.mx
+    service: http://gpu-nginx:80
+  - service: http_status:404
