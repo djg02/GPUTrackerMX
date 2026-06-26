@@ -4,6 +4,7 @@ services:
   api:
     build: ./API
     container_name: gpu-api
+    restart: always
     env_file:
       - .env
     depends_on:
@@ -21,6 +22,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: gpu-nginx
+    restart: always
     ports:
       - "8080:80"
     volumes:
