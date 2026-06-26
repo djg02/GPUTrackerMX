@@ -127,8 +127,6 @@ function GpuListPage() {
     return (
     <div className="p-8 bg-gray-900 min-h-screen">
         <div className="flex flex-col md:flex-row gap-8">
-        <div className="flex gap-2 mb-4">
-            </div>
             {/* Filter panel: always visible on desktop, overlay on mobile when open */}
             <div className={`
                 ${isFilterOpen ? 'fixed inset-0 z-50 bg-gray-900 p-6 overflow-y-auto' : 'hidden'}

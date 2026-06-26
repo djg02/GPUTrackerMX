@@ -23,6 +23,9 @@ const STORE_COLORS: Record<string, string> = {
   'DDTech': '#3b82f6',
   'digitalife': '#22c55e',
   'PCEL': '#eab308',
+  'Zegucom': '#a855f7',
+  'MercadoLibre': '#ec4899',
+  'Intercompras': '#ef4444', 
 }
 
 function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
