@@ -49,4 +49,7 @@ python matchers/match_by_sku.py
 python matchers/match_by_specs.py
 python matchers/match_by_sku.py
 
+echo "-- Mark Stale Listings --"
+python pipeline/mark_stale_listings.py
+
 echo "=== Pipeline Complete ==="
