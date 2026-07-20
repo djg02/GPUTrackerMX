@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams} from 'react-router-dom'
 import type {GpuResponse, ActiveFilters } from '../types'
 import Pagination from '../components/Pagination'
@@ -36,23 +36,29 @@ function GpuListPage() {
     const filters = filtersFromParams(searchParams)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [inputValue, setInputValue] = useState(search)
+    const isFirstRender = useRef(true)
 
     // 1. Debounce: wait 300ms after user stops typing before updating debouncedSearch
     useEffect(() => {
-    const timer = setTimeout(() => {
-        setSearchParams(prev => {
-        const next = new URLSearchParams(prev)
-        if (inputValue) {
-            next.set('search', inputValue)
-        } else {
-            next.delete('search')
+        if (isFirstRender.current) {
+            isFirstRender.current = false
+            return
         }
-        next.set('page', '1')
-        return next
-        })
-    }, 300)
 
-    return () => clearTimeout(timer)
+        const timer = setTimeout(() => {
+            setSearchParams(prev => {
+            const next = new URLSearchParams(prev)
+            if (inputValue) {
+                next.set('search', inputValue)
+            } else {
+                next.delete('search')
+            }
+            next.set('page', '1')
+            return next
+            })
+        }, 300)
+
+        return () => clearTimeout(timer)
     }, [inputValue])
 
     // 2. Fetch: re-runs whenever debouncedSearch or page changes
