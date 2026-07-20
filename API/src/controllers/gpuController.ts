@@ -80,6 +80,7 @@ export const getAllGpus = async (req: Request, res: Response) => {
   try {
     const conditions: string[] = [];
     const havingConditions: string[] = [];
+    havingConditions.push(`COUNT(l.listingid) > 0`);
     const values: any[] = [];
     const brandArr = toArray(brand)
     const manufacturerArr = toArray(manufacturer)
@@ -177,7 +178,7 @@ export const getAllGpus = async (req: Request, res: Response) => {
     `, values);
 
     const products = result.rows.map((product: any) => {
-        const hasListings = product.listings[0]?.storename !== null;
+        const hasListings = product.listings != null && product.listings[0]?.storename !== null;
 
         let lowestPrice = null;
         if (hasListings) {
@@ -257,7 +258,7 @@ export const getGpuById = async (req: Request, res: Response) => {
     }
 
     const product = result.rows[0];
-    const hasListings = product.listings[0]?.storename !== null;
+    const hasListings = product.listings != null && product.listings[0]?.storename !== null;
 
     let lowestPrice = null;
     if (hasListings) {
