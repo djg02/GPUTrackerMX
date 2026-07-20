@@ -16,13 +16,25 @@ conn = psycopg.connect(
 
 with conn.cursor() as cur:
     for store_id in STORE_IDS:
+        # 3+ days → hidden
         cur.execute("""
             UPDATE listing
-            SET availabilitystatus = 'out_of_stock',
+            SET availabilitystatus = 'hidden',
+                updatedat = NOW()
+            WHERE storeid = %s
+              AND lastseenat < NOW() - INTERVAL '3 days'
+              AND availabilitystatus != 'hidden'
+        """, (store_id,))
+        print(f"Store {store_id}: {cur.rowcount} listings marked hidden")
+
+        # 24h → out of stock (skip already hidden)
+        cur.execute("""
+            UPDATE listing
+            SET availabilitystatus = 'OutOfStock1',
                 updatedat = NOW()
             WHERE storeid = %s
               AND lastseenat < NOW() - INTERVAL '24 hours'
-              AND availabilitystatus != 'out_of_stock'
+              AND availabilitystatus NOT IN ('OutOfStock', 'hidden')
         """, (store_id,))
         print(f"Store {store_id}: {cur.rowcount} listings marked out of stock")
 

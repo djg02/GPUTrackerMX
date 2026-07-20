@@ -131,7 +131,7 @@ export const getAllGpus = async (req: Request, res: Response) => {
               SELECT p.productid
               FROM product p
               LEFT JOIN product_listing_match m ON m.productid = p.productid
-              LEFT JOIN listing l ON l.listingid = m.listingid
+              LEFT JOIN listing l ON l.listingid = m.listingid AND l.availabilitystatus != 'hidden'
               LEFT JOIN store s ON s.storeid = l.storeid
               ${whereClause}
               GROUP BY p.productid
@@ -164,10 +164,10 @@ export const getAllGpus = async (req: Request, res: Response) => {
                 'availabilitystatus', l.availabilitystatus,
                 'shippingprice', l.shippingprice
                 ) ORDER BY l.currentprice ASC
-            ) AS listings
+            ) FILTER (WHERE l.listingid IS NOT NULL) AS listings
         FROM product p
         LEFT JOIN product_listing_match m ON m.productid = p.productid
-        LEFT JOIN listing l ON l.listingid = m.listingid
+        LEFT JOIN listing l ON l.listingid = m.listingid AND l.availabilitystatus != 'hidden'
         LEFT JOIN store s ON s.storeid = l.storeid
         ${whereClause}
         GROUP BY p.productid, p.canonicalname, p.brand, p.model, p.vramgb
@@ -243,10 +243,10 @@ export const getGpuById = async (req: Request, res: Response) => {
                 'lastseen', l.lastseenat,
                 'currentpriceupdated', l.currentpriceupdatedat
                 ) ORDER BY (l.currentprice + COALESCE(l.shippingprice, 0)) ASC
-            ) AS listings
+            ) FILTER (WHERE l.listingid IS NOT NULL) AS listings
         FROM product p
         LEFT JOIN product_listing_match m ON m.productid = p.productid
-        LEFT JOIN listing l ON l.listingid = m.listingid
+        LEFT JOIN listing l ON l.listingid = m.listingid AND l.availabilitystatus != 'hidden'
         LEFT JOIN store s ON s.storeid = l.storeid
         WHERE p.productid = $1
         GROUP BY p.productid, p.canonicalname, p.brand, p.model, p.vramgb
@@ -297,7 +297,7 @@ export const getGpuFilters = async (req: Request, res: Response) => {
               SELECT MIN(l.currentprice) FILTER (WHERE l.availabilitystatus IN ('InStock', 'Available')) AS price
               FROM product p
               LEFT JOIN product_listing_match m ON m.productid = p.productid
-              LEFT JOIN listing l ON l.listingid = m.listingid
+              LEFT JOIN listing l ON l.listingid = m.listingid AND l.availabilitystatus != 'hidden'
               GROUP BY p.productid
             ) AS lowest_prices
             WHERE price IS NOT NULL
