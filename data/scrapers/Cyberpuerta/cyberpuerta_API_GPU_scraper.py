@@ -42,7 +42,8 @@ insert_query = """
         AvailabilityStatus = EXCLUDED.AvailabilityStatus,
         ShippingPrice = EXCLUDED.ShippingPrice,
         RawJson = EXCLUDED.RawJson,
-        SpecJson = EXCLUDED.SpecJson
+        SpecJson = EXCLUDED.SpecJson,
+        Link = EXCLUDED.Link
     RETURNING listingid, currentprice, shippingprice, currency;
 """
 
