@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams} from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import type {GpuResponse, ActiveFilters } from '../types'
 import Pagination from '../components/Pagination'
 import GpuTable from '../components/GpuTable'
@@ -131,6 +132,12 @@ function GpuListPage() {
 
 
     return (
+    <div>
+        <Helmet>
+            <title>GPUTrackerMX - Comparador de Tarjetas Gráficas en México</title>
+            <meta name="description" content="Compara precios, especificaciones y disponibilidad de tarjetas gráficas en múltiples tiendas en México. Precios históricos, stock en tiempo real y costos de envío." />
+            <link rel="canonical" href="https://gputracker.mx/" />
+        </Helmet>
     <div className="p-8 bg-gray-900 min-h-screen">
         <div className="flex flex-col md:flex-row gap-8">
             {/* Filter panel: always visible on desktop, overlay on mobile when open */}
@@ -234,6 +241,7 @@ function GpuListPage() {
         </div>
         </div>
     </div>
+    </div>   
     )
     }
     export default GpuListPage

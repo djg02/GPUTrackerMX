@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate} from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import type { Gpu } from '../types'
 import SpecsSidebar from '../components/SpecsSidebar'
 import PricesTable from '../components/PricesTable'
@@ -30,8 +31,15 @@ function GpuDetailPage() {
   if (error) return <p className="p-8 text-red-500">{error}</p>
   if (!gpu) return null
 
+  const pageTitle = `${gpu.canonicalname} - GPUTrackerMX`
+
   return (
-    
+    <div>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={`Consulta precios actuales y históricos, especificaciones técnicas y disponibilidad de ${gpu.canonicalname} en tiendas mexicanas. Incluye costos de envío.`} />
+        <link rel="canonical" href={`https://gputracker.mx/gpu/${gpu.productid}`} />
+      </Helmet>
     <div className="p-8 bg-gray-900 min-h-screen overflow-x-hidden">
         <button 
           onClick={() => navigate(-1)}
@@ -46,6 +54,7 @@ function GpuDetailPage() {
         <PricesTable listings={gpu.listings} />
     </div>
         <PriceHistoryChart productId={gpu.productid} />
+    </div>
     </div>
   )
 }
