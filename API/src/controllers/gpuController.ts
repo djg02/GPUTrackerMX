@@ -363,3 +363,31 @@ export const getGpuHistory = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch price history' });
   }
 };
+
+export const getSitemap = async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT productid FROM product ORDER BY productid`)
+
+    const urls = result.rows.map((r: any) => `
+  <url>
+    <loc>https://gputracker.mx/gpu/${r.productid}</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('')
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://gputracker.mx/</loc>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>${urls}
+</urlset>`
+
+    res.setHeader('Content-Type', 'application/xml')
+    res.send(xml)
+  } catch (error) {
+    console.error(error)
+    res.status(500).send('Failed to generate sitemap')
+  }
+}
