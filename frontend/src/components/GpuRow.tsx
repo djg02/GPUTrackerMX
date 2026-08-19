@@ -30,6 +30,23 @@ const getInStockStores = (listings: Listing[]) => [
   ).values()
 ]
 
+const getBestImage = (listings: Listing[]): string => {
+  // First priority: non-Digitalife, non-PCEL listings
+  const preferred = listings.find(l => 
+    l.storename !== 'digitalife' && 
+    l.storename !== 'PCEL' && 
+    l.imageurl
+  )
+  if (preferred) return preferred.imageurl
+  
+  // Second priority: PCEL (better than placeholder, worse than other stores)
+  const pcelImage = listings.find(l => l.storename === 'PCEL' && l.imageurl)
+  if (pcelImage) return pcelImage.imageurl
+
+  // Last resort: placeholder
+  return '/gpu-placeholder.png'
+}
+
 function GpuRow({ gpu }: GpuRowProps) {
   const navigate = useNavigate()
   const inStockStores = getInStockStores(gpu.listings)
@@ -45,7 +62,7 @@ function GpuRow({ gpu }: GpuRowProps) {
           <div className="flex items-center gap-3">
             {gpu.listings[0]?.imageurl && (
               <img 
-                src={gpu.listings[0].imageurl} 
+                src={getBestImage(gpu.listings)}
                 alt={gpu.canonicalname}
                 className="w-16 h-16 object-contain"
               />
@@ -103,7 +120,7 @@ function GpuRow({ gpu }: GpuRowProps) {
         <div className="flex gap-3">
           {gpu.listings[0]?.imageurl && (
             <img 
-              src={gpu.listings[0].imageurl} 
+              src={getBestImage(gpu.listings)}
               alt={gpu.canonicalname}
               className="w-20 h-20 object-contain shrink-0"
             />

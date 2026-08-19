@@ -1,4 +1,21 @@
-import type { Gpu } from '../types'
+import type { Listing, Gpu } from '../types'
+
+const getBestImage = (listings: Listing[]): string => {
+  // First priority: non-Digitalife, non-PCEL listings
+  const preferred = listings.find(l => 
+    l.storename !== 'digitalife' && 
+    l.storename !== 'PCEL' && 
+    l.imageurl
+  )
+  if (preferred) return preferred.imageurl
+  
+  // Second priority: PCEL (better than placeholder, worse than other stores)
+  const pcelImage = listings.find(l => l.storename === 'PCEL' && l.imageurl)
+  if (pcelImage) return pcelImage.imageurl
+
+  // Last resort: placeholder
+  return '/gpu-placeholder.png'
+}
 
 interface SpecsSidebarProps {
   gpu: Gpu
@@ -10,7 +27,7 @@ function SpecsSidebar({ gpu }: SpecsSidebarProps) {
       {/* Image */}
       {gpu.listings[0]?.imageurl && (
         <img
-          src={gpu.listings[0].imageurl}
+          src={getBestImage(gpu.listings)}
           alt={gpu.canonicalname}
           className="w-full object-contain border border-gray-700 rounded bg-gray-800 p-2"
         />
