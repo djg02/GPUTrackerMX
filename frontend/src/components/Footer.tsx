@@ -11,7 +11,7 @@ function Footer() {
         className="flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-orange-500"
       >
         <img src={githubLogo} alt="GitHub" className="h-15 w-auto" />
-        GPUTrackerMX en GitHub
+        GPU Tracker MX en GitHub
       </a>
 
       <span className="hidden md:inline text-gray-600">|</span>

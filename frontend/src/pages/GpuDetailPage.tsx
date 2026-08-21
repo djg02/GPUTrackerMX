@@ -31,13 +31,14 @@ function GpuDetailPage() {
   if (error) return <p className="p-8 text-red-500">{error}</p>
   if (!gpu) return null
 
-  const pageTitle = `${gpu.canonicalname} - GPUTrackerMX`
-
+  const pageTitle = `${gpu.canonicalname} Precios en México | GPU Tracker MX`
+  const seoHeading = `Compara precios, stock y envío de la ${gpu.canonicalname} en México. Consulta precios en DDTech, Cyberpuerta, Mercado Libre y más.`
+  
   return (
     <div>
       <Helmet>
         <title>{pageTitle}</title>
-        <meta name="description" content={`Consulta precios actuales y históricos, especificaciones técnicas y disponibilidad de ${gpu.canonicalname} en tiendas mexicanas. Incluye costos de envío.`} />
+        <meta name="description" content={seoHeading} />
         <link rel="canonical" href={`https://gputracker.mx/gpu/${gpu.productid}`} />
       </Helmet>
     <div className="p-8 bg-gray-900 min-h-screen overflow-x-hidden">
@@ -47,7 +48,8 @@ function GpuDetailPage() {
         >
           &larr; Volver al listado
         </button>
-     <h1 className="text-2xl font-bold mt-4 text-gray-50">{gpu.canonicalname}</h1>
+      <h1 className="text-2xl font-bold mt-4 text-gray-50">{gpu.canonicalname}</h1>
+      <h2 className="sr-only">{seoHeading}</h2>
 
     <div className="flex flex-col md:flex-row gap-8 mt-6">
         <SpecsSidebar gpu={gpu} />
