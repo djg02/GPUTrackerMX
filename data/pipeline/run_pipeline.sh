@@ -13,6 +13,7 @@ python scrapers/Intercompras/intercompras_bs_flareresolver_GPU_scraper.py
 python scrapers/PCEL/pcel_flaresolver_GPU_scraper.py
 python scrapers/Zegucom/zegucom_bs_flareresolver_GPU_scraper.py
 python scrapers/MercadoLibre/ML_camoufox_GPU_scraper.py
+python scrapers/Amazon/Amazon_Playwright_GPU_scraper.py
 
 echo "-- Parsers --"
 python parsers/cyberpuerta_listing_parser.py
@@ -22,6 +23,7 @@ python parsers/intercompras_listing_parser.py
 python parsers/pcel_listing_parser.py
 python parsers/zegucom_listing_parser.py
 python parsers/ML_listing_parser_scratch.py
+python parsers/Amazon_listing_parser.py
 
 echo "-- Normalize --"
 python normalization/normalize_listings.py

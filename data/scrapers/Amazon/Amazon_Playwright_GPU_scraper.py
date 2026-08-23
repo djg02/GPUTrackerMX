@@ -218,7 +218,7 @@ total_saved = 0
 with sync_playwright() as p:
 
     context = p.firefox.launch_persistent_context(
-        "amazon-profile",
+        "scrapers/Amazon/amazon-profile",
         headless=True,
         locale="es-MX",
     )
