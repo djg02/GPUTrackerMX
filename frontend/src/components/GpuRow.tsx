@@ -7,6 +7,7 @@ import pcellogo from '../assets/store_logos/pcel.png'
 import MLLogo from '../assets/store_logos/mercadolibre.png'
 import zegucomLogo from '../assets/store_logos/zegucom.png'
 import intercomprasLogo from '../assets/store_logos/intercompras.png'
+import amazonLogo from '../assets/store_logos/amazon.png'
 
 interface GpuRowProps {
   gpu: Gpu
@@ -20,6 +21,7 @@ const storeLogos: Record<string, string> = {
   'MercadoLibre' : MLLogo,
   'Zegucom' : zegucomLogo,
   'Intercompras' : intercomprasLogo,
+  'Amazon' : amazonLogo,
 }
 
 const getInStockStores = (listings: Listing[]) => [

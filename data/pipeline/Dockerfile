@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 COPY pipeline/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m camoufox fetch
+RUN playwright install --with-deps firefox
 
 RUN mkdir -p /app/logs
 

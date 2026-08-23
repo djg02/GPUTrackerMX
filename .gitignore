@@ -19,3 +19,5 @@ frontend/dist
 logs/
 
 cloudflared/*.json
+
+data/scrapers/Amazon/amazon-profile/

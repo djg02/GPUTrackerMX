@@ -26,6 +26,7 @@ const STORE_COLORS: Record<string, string> = {
   'Zegucom': '#a855f7',
   'MercadoLibre': '#ec4899',
   'Intercompras': '#ef4444', 
+  'Amazon': '#06b6d4',
 }
 
 function PriceHistoryChart({ productId }: PriceHistoryChartProps) {

@@ -134,7 +134,7 @@ function GpuListPage() {
     return (
     <div>
         <Helmet>
-            <title> GPU Tracker MX - Compara precios, stock y envío de GPUs en las principales tiendas mexicanas. </title>
+            <title> GPUTrackerMX - Compara precios, stock y envío de GPUs en las principales tiendas mexicanas. </title>
             <meta name="description" content="Compara precios, especificaciones y disponibilidad de tarjetas gráficas en múltiples tiendas en México. Precios históricos, stock en tiempo real y costos de envío." />
             <link rel="canonical" href="https://gputracker.mx/" />
         </Helmet>
