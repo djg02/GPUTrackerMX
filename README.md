@@ -24,6 +24,7 @@ A full-stack GPU price tracking and comparison system with automated scraping an
 ## Supported Stores
 
 * MercadoLibre
+* Amazon
 * DDTech
 * Cyberpuerta
 * Digitalife
