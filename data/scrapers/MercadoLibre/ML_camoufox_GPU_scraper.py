@@ -95,6 +95,7 @@ def save_listing(cursor, conn, listing):
         ON CONFLICT (StoreId, StoreListingId)
         DO UPDATE SET
             CurrentPrice = EXCLUDED.CurrentPrice,
+            AvailabilityStatus = 'InStock',
             LastSeenAt = NOW(),
             RawJson = EXCLUDED.RawJson,
             UpdatedAt = NOW(),
